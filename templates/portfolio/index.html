@@ -1,0 +1,778 @@
+{% extends 'portfolio/base.html' %} 
+{% load static %} 
+{% block title %} 
+{% if system_config and system_config.seo_default_meta_title %} 
+{{ system_config.seo_default_meta_title }} 
+{% elif portfolio_profile and portfolio_profile.full_name %} 
+{{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} {% endblock %} 
+{% block meta_description %} 
+{% if system_config and system_config.seo_default_meta_description %} 
+{{ system_config.seo_default_meta_description }} 
+{% elif portfolio_profile and portfolio_profile.headline %} 
+{{ portfolio_profile.headline }} 
+{% else %} Professional portfolio showcasing projects, experience, skills, and contact
+information. 
+{% endif %} 
+{% endblock %} 
+{% block meta_keywords %} 
+{% if system_config and system_config.seo_default_meta_keywords %} 
+{{ system_config.seo_default_meta_keywords }} 
+{% else %} 
+portfolio, web developer, projects, experience, skills, professional profile 
+{% endif %} 
+{% endblock %} 
+{% block og_title %} 
+{% if portfolio_profile and portfolio_profile.full_name %} 
+{{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} {% endblock %} 
+{% block og_description %} 
+{% if portfolio_profile and portfolio_profile.headline %} 
+{{ portfolio_profile.headline }} 
+{% else %}Explore this professional portfolio with projects, experience, and skills. {% endif %} {% endblock %} 
+{% block twitter_title %} {% if portfolio_profile and portfolio_profile.full_name %} 
+{{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} 
+{% endblock %} 
+{% block twitter_description %} 
+{% if portfolio_profile and portfolio_profile.headline %}
+{{ portfolio_profile.headline }} {% else %} Explore this professional portfolio with projects, experience, and skills. {% endif %} {% endblock %} 
+
+{% block content %}
+<!-- Hero Section with Cover Image -->
+<section class="hero-section">
+  <div class="cover-image-container">
+    {% if portfolio_profile.cover_image %}
+    <img
+      src="{{ portfolio_profile.cover_image.url }}"
+      alt="Cover"
+      class="cover-image animate__animated animate__fadeIn"
+    />
+    {% else %}
+    <div class="cover-image-placeholder">
+      <div class="placeholder-content">
+        <h1 class="animate__animated animate__fadeInDown">
+          {{ portfolio_profile.full_name|default:'Your Name' }}
+        </h1>
+        <p class="animate__animated animate__fadeInUp">
+          {{ portfolio_profile.headline|default:'Professional Headline' }}
+        </p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card-container">
+    <div class="profile-card animate__animated animate__zoomIn">
+      <div class="profile-image-wrapper">
+        {% if portfolio_profile.profile_image %}
+        <img
+          src="{{ portfolio_profile.profile_image.url }}"
+          alt="{{ portfolio_profile.full_name }}"
+          class="profile-image"
+        />
+        {% else %}
+        <div class="profile-image-placeholder">
+          <i class="fas fa-user"></i>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="profile-info">
+        <h1>{{ portfolio_profile.full_name|default:'Your Name' }}</h1>
+        <p class="headline">
+          {{ portfolio_profile.headline|default:'Professional Headline' }}
+        </p>
+
+        <div class="profile-meta">
+          {% if portfolio_profile.location %}
+          <span class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ portfolio_profile.location }}
+          </span>
+          {% endif %} {% if portfolio_profile.email and portfolio_profile.show_email %}
+          <span class="email">
+            <i class="fas fa-envelope"></i>
+            {{ portfolio_profile.email }}
+          </span>
+          {% endif %}
+        </div>
+
+        <div class="profile-social">
+          {% if portfolio_profile.linkedin %}
+          <a
+            href="{{ portfolio_profile.linkedin }}"
+            target="_blank"
+            class="social-btn linkedin"
+          >
+            <i class="fab fa-linkedin"></i>
+          </a>
+          {% endif %} {% if portfolio_profile.github %}
+          <a
+            href="{{ portfolio_profile.github }}"
+            target="_blank"
+            class="social-btn github"
+          >
+            <i class="fab fa-github"></i>
+          </a>
+          {% endif %} {% if portfolio_profile.twitter %}
+          <a
+            href="{{ portfolio_profile.twitter }}"
+            target="_blank"
+            class="social-btn twitter"
+          >
+            <i class="fab fa-twitter"></i>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="section about-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-user"></i>
+      About Me
+    </h2>
+
+    <div class="about-content">
+      {% if portfolio_profile.summary %} {{ portfolio_profile.summary|safe }} {% else %}
+      <p>
+        Your professional summary will appear here. Edit it in the admin panel
+        to showcase your experience, skills, and achievements.
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="action-buttons">
+      <a href="#contact" class="btn btn-primary">
+        <i class="fas fa-paper-plane"></i> Contact Me
+      </a>
+      {% if portfolio_visibility and portfolio_visibility.show_media and media_files %}
+      <a href="{% url 'media_gallery' %}" class="btn btn-secondary">
+        <i class="fas fa-images"></i> View Gallery
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Experience Section -->
+{% if portfolio_visibility and portfolio_visibility.show_experience and experiences %}
+<section id="experience" class="section experience-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-briefcase"></i>
+      Experience
+    </h2>
+
+    <div class="timeline">
+      {% for exp in experiences %}
+      <div class="timeline-item">
+        <div class="timeline-content">
+          {% if exp.company_logo %}
+          <img
+            src="{{ exp.company_logo.url }}"
+            alt="{{ exp.company }}"
+            class="company-logo"
+          />
+          {% endif %}
+
+          <div class="timeline-header">
+            <h3>{{ exp.title|default:'Position' }}</h3>
+            <div class="company-info">
+              {% if exp.company_url %}
+              <a
+                href="{{ exp.company_url }}"
+                target="_blank"
+                class="company-name"
+              >
+                {{ exp.company|default:'Company' }}
+              </a>
+              {% else %}
+              <span class="company-name"
+                >{{ exp.company|default:'Company' }}</span
+              >
+              {% endif %} {% if exp.location %}
+              <span class="company-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ exp.location }}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="timeline-period">
+            <i class="far fa-calendar"></i>
+            {{ exp.start_date|date:"M Y" }} - {% if exp.currently_working %}
+            Present {% elif exp.end_date %} {{ exp.end_date|date:"M Y" }} {% else %} Present {% endif %}
+          </div>
+
+          {% if exp.description %}
+          <div class="timeline-description">{{ exp.description|safe }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- DEBUG: Check Education Data -->
+  <div style="display: none; background: yellow; padding: 10px">
+    Education Visibility: {{ portfolio_visibility.show_education|default:"No visibility object" }}<br />
+    Number of Educations: {{ educations|length|default:"0" }}<br />
+    Educations List: {% for edu in educations %} {{ edu.degree }} at {{ edu.institution }}<br />
+    {% empty %} No educations found {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Education Section -->
+{% if portfolio_visibility and portfolio_visibility.show_education and educations %}
+<section id="education" class="section education-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-graduation-cap"></i>
+      Education
+    </h2>
+
+    <div class="timeline">
+      {% for edu in educations %}
+      <div class="timeline-item">
+        <div class="timeline-content">
+          {% if edu.institution_logo %}
+          <img
+            src="{{ edu.institution_logo.url }}"
+            alt="{{ edu.institution }}"
+            class="institution-logo"
+          />
+          {% endif %}
+
+          <div class="timeline-header">
+            <h3>{{ edu.degree|default:'Degree' }}</h3>
+            <div class="institution-info">
+              {% if edu.institution_url %}
+              <a
+                href="{{ edu.institution_url }}"
+                target="_blank"
+                class="institution-name"
+              >
+                {{ edu.institution|default:'Institution' }}
+              </a>
+              {% else %}
+              <span class="institution-name"
+                >{{ edu.institution|default:'Institution' }}</span
+              >
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="timeline-period">
+            <i class="far fa-calendar"></i>
+            {{ edu.start_date|date:"M Y" }} - {% if edu.end_date %} {{ edu.end_date|date:"M Y" }} {% else %} Present {% endif %}
+          </div>
+
+          {% if edu.description %}
+          <div class="timeline-description">{{ edu.description|safe }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Projects Section -->
+{% if portfolio_visibility and portfolio_visibility.show_projects and projects %}
+<section id="projects" class="section projects-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-project-diagram"></i>
+      Projects
+    </h2>
+
+    {% if featured_projects %}
+    <div class="featured-projects">
+      <h3 class="section-subtitle">Featured Projects</h3>
+      <div class="projects-grid">
+        {% for project in featured_projects %}
+        <div class="project-card featured">
+          {% if project.thumbnail %}
+          <img
+            src="{{ project.thumbnail.url }}"
+            alt="{{ project.title }}"
+            class="project-thumbnail"
+          />
+          {% endif %}
+
+          <div class="project-content">
+            <h3>{{ project.title|default:'Project Title' }}</h3>
+
+            <div class="project-description">
+              {{ project.description|safe|truncatewords:30 }}
+            </div>
+
+            {% if project.technologies %}
+            <div class="project-technologies">
+              {% for tech in project.get_technologies_list|slice:":5" %}
+              <span class="tech-tag">{{ tech }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="project-links">
+              {% if project.project_url %}
+              <a
+                href="{{ project.project_url }}"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fas fa-external-link-alt"></i> Live Demo
+              </a>
+              {% endif %} {% if project.github_url %}
+              <a
+                href="{{ project.github_url }}"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fab fa-github"></i> Code
+              </a>
+              {% endif %}
+
+              <a
+                href="{% url 'project_detail' project.pk %}"
+                class="project-link"
+              >
+                <i class="fas fa-info-circle"></i> Details
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="all-projects">
+      <h3 class="section-subtitle">All Projects</h3>
+      <div class="projects-grid">
+        {% for project in projects %} {% if not project.featured %}
+        <div class="project-card">
+          {% if project.thumbnail %}
+          <img
+            src="{{ project.thumbnail.url }}"
+            alt="{{ project.title }}"
+            class="project-thumbnail"
+          />
+          {% endif %}
+
+          <div class="project-content">
+            <h3>{{ project.title|default:'Project Title' }}</h3>
+
+            <div class="project-description">
+              {{ project.description|safe|truncatewords:20 }}
+            </div>
+
+            <div class="project-links">
+              {% if project.project_url %}
+              <a
+                href="{{ project.project_url }}"
+                target="_blank"
+                class="project-link"
+              >
+                <i class="fas fa-external-link-alt"></i> Demo
+              </a>
+              {% endif %}
+
+              <a
+                href="{% url 'project_detail' project.pk %}"
+                class="project-link"
+              >
+                <i class="fas fa-arrow-right"></i> View
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Skills Section -->
+{% if portfolio_visibility and portfolio_visibility.show_skills and skills_by_category %}
+<section id="skills" class="section skills-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-star"></i>
+      Skills
+    </h2>
+
+    <div class="skills-container">
+      {% for category, skills in skills_by_category.items %}
+      <div class="skill-category">
+        <h3 class="category-title">{{ category }}</h3>
+        <div class="skill-items">
+          {% for skill in skills %}
+          <div class="skill-item">
+            <div class="skill-header">
+              {% if skill.icon %}
+              <i class="{{ skill.icon }} skill-icon"></i>
+              {% endif %}
+              <span class="skill-name">{{ skill.name }}</span>
+              {% if skill.level %}
+              <span class="skill-level {{ skill.level }}"
+                >{{ skill.level }}</span
+              >
+              {% endif %}
+            </div>
+
+            {% if skill.proficiency %}
+            <div class="skill-progress">
+              <div class="progress-bar" style="width: {{ skill.proficiency }}%">
+                <span class="progress-text">{{ skill.proficiency }}%</span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Dynamic Sections -->
+{% if dynamic_sections %} 
+{% for section in dynamic_sections %}
+<section
+  id="section-{{ section.id }}"
+  class="section dynamic-section {{ section.layout_style }} {{ section.css_class }}"
+  data-aos="fade-up"
+>
+  <div class="container">
+    {% if section.show_title %}
+    <h2 class="section-title">
+      {% if section.icon %}
+      <i class="{{ section.icon }}"></i>
+      {% endif %} {{ section.title }}
+    </h2>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% if section.content %}
+    <div class="dynamic-section-content">{{ section.content|safe }}</div>
+    {% endif %}
+
+    <!-- Section Items (for galleries, lists, etc.) -->
+    {% if section.items.exists %}
+    <div class="section-items {{ section.section_type }}-items">
+      {% if section.section_type == 'gallery' %}
+      <!-- Image Gallery Layout -->
+      <div class="gallery-grid">
+        {% for item in section.items.all %}
+        <div class="gallery-item">
+          {% if item.image %}
+          <img
+            src="{{ item.image.url }}"
+            alt="{{ item.title }}"
+            class="gallery-image"
+          />
+          {% elif item.icon %}
+          <div class="gallery-icon">
+            <i class="{{ item.icon }}"></i>
+          </div>
+          {% endif %} {% if item.title %}
+          <div class="gallery-caption">
+            <h3>{{ item.title }}</h3>
+            {% if item.description %}
+            <p>{{ item.description }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      {% elif section.section_type == 'testimonials' %}
+      <!-- Testimonials Layout -->
+      <div class="testimonials-slider">
+        {% for item in section.items.all %}
+        <div class="testimonial-item">
+          <div class="testimonial-content">
+            <p>"{{ item.description }}"</p>
+          </div>
+          <div class="testimonial-author">
+            {% if item.image %}
+            <img
+              src="{{ item.image.url }}"
+              alt="{{ item.title }}"
+              class="author-image"
+            />
+            {% endif %}
+            <div class="author-info">
+              <h4>{{ item.title }}</h4>
+              {% if item.subtitle %}
+              <p>{{ item.subtitle }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% elif section.section_type == 'services' %}
+      <!-- Services Layout -->
+      <div class="services-grid">
+        {% for item in section.items.all %}
+        <div class="service-item">
+          {% if item.icon %}
+          <div class="service-icon">
+            <i class="{{ item.icon }}"></i>
+          </div>
+          {% endif %}
+
+          <div class="service-content">
+            <h3>{{ item.title }}</h3>
+            {% if item.description %}
+            <p>{{ item.description }}</p>
+            {% endif %} {% if item.url %}
+            <a href="{{ item.url }}" class="service-link">
+              {{ item.url_text|default:"Learn More" }}
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% elif section.section_type == 'awards' %}
+      <!-- Awards Layout -->
+      <div class="awards-timeline">
+        {% for item in section.items.all %}
+        <div class="award-item">
+          <div class="award-date">
+            {% if item.date %} 
+            {{ item.date|date:"Y" }} 
+            {% elif item.date_text %} 
+            {{ item.date_text }} 
+            {% endif %}
+          </div>
+
+          <div class="award-content">
+            <h3>{{ item.title }}</h3>
+            {% if item.subtitle %}
+            <p class="award-org">{{ item.subtitle }}</p>
+            {% endif %} {% if item.description %}
+            <p class="award-description">{{ item.description }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <!-- Default List Layout -->
+      <div class="section-items-list">
+        {% for item in section.items.all %}
+        <div class="section-item">
+          {% if item.icon %}
+          <i class="{{ item.icon }} item-icon"></i>
+          {% endif %}
+
+          <div class="item-content">
+            <h3>{{ item.title }}</h3>
+
+            {% if item.subtitle %}
+            <p class="item-subtitle">{{ item.subtitle }}</p>
+            {% endif %} {% if item.description %}
+            <p class="item-description">{{ item.description }}</p>
+            {% endif %} {% if item.date %}
+            <span class="item-date">
+              <i class="far fa-calendar"></i> {{ item.date|date:"F Y" }}
+            </span>
+            {% endif %} {% if item.url %}
+            <a href="{{ item.url }}" target="_blank" class="item-link">
+              {{ item.url_text|default:"View Details" }}
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endfor %} {% endif %}
+
+<!-- Contact Section -->
+<section id="contact" class="section contact-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="section-title">
+      <i class="fas fa-envelope"></i>
+      Get In Touch
+    </h2>
+
+    <div class="contact-container">
+      <div class="contact-info">
+        <h3>Contact Information</h3>
+
+        <div class="contact-details">
+          {% if portfolio_profile.email %}
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <strong>Email</strong>
+              <a href="mailto:{{ portfolio_profile.email }}"
+                >{{ portfolio_profile.email }}</a
+              >
+            </div>
+          </div>
+          {% endif %} {% if portfolio_profile.phone and portfolio_profile.show_phone %}
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <div>
+              <strong>Phone</strong>
+              <a href="tel:{{ portfolio_profile.phone }}"
+                >{{ portfolio_profile.phone }}</a
+              >
+            </div>
+          </div>
+          {% endif %} {% if portfolio_profile.location %}
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+              <strong>Location</strong>
+              <span>{{ portfolio_profile.location }}</span>
+            </div>
+          </div>
+          {% endif %} {% if portfolio_profile.website %}
+          <div class="contact-item">
+            <i class="fas fa-globe"></i>
+            <div>
+              <strong>Website</strong>
+              <a href="{{ portfolio_profile.website }}" target="_blank"
+                >{{ portfolio_profile.website }}</a
+              >
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h3>Send Message</h3>
+        <form id="contactForm" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <input type="text" name="name" placeholder="Your Name" required />
+          </div>
+
+          <div class="form-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <input type="text" name="subject" placeholder="Subject" required />
+          </div>
+
+          <div class="form-group">
+            <textarea
+              name="message"
+              placeholder="Your Message"
+              rows="5"
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const contactForm = document.getElementById('contactForm');
+
+      if (contactForm) {
+          contactForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+
+              // Show loading state
+              const submitBtn = this.querySelector('button[type="submit"]');
+              const originalText = submitBtn.innerHTML;
+              submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+              submitBtn.disabled = true;
+
+              // Get form data
+              const formData = new FormData(this);
+
+              // Send AJAX request to current URL
+              fetch(window.location.href, {
+                  method: 'POST',
+                  body: formData,
+                  headers: {
+                      'X-Requested-With': 'XMLHttpRequest',
+                      'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                  }
+              })
+              .then(response => {
+                  if (response.headers.get('content-type')?.includes('application/json')) {
+                      return response.json();
+                  } else {
+                      return response.text().then(text => {
+                          // Handle non-JSON response by redirecting
+                          window.location.reload();
+                          return null;
+                      });
+                  }
+              })
+              .then(data => {
+                  if (data && data.success) {
+                      // Show success message
+                      alert('✓ Message sent successfully! I\'ll get back to you soon.');
+                      // Reset form
+                      contactForm.reset();
+                  } else if (data && data.message) {
+                      alert('⚠️ ' + data.message);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('❌ An error occurred. Please try again or email me directly.');
+              })
+              .finally(() => {
+                  // Reset button state
+                  submitBtn.innerHTML = originalText;
+                  submitBtn.disabled = false;
+              });
+          });
+      }
+
+      // Also handle messages from Django message framework
+      {% if messages %}
+      {% for message in messages %}
+      alert("{{ message }}");
+      {% endfor %}
+      {% endif %}
+  });
+</script>
+{% endblock %}

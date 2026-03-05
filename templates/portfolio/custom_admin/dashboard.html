@@ -1,0 +1,114 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Portfolio Dashboard</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card" style="background:#007bff;">
+            <h3>Total Messages</h3>
+            <p class="stat-number">{{ total_messages }}</p>
+        </div>
+        <div class="stat-card" style="background:#dc3545;">
+            <h3>Unread Messages</h3>
+            <p class="stat-number">{{ unread_messages }}</p>
+        </div>
+        <div class="stat-card" style="background:#28a745;">
+            <h3>Pending Replies</h3>
+            <p class="stat-number">{{ pending_replies }}</p>
+        </div>
+    </div>
+    
+    <div class="recent-messages">
+        <h2>Recent Messages</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in recent_messages %}
+                <tr>
+                    <td>{{ msg.name }}</td>
+                    <td>{{ msg.email }}</td>
+                    <td>{{ msg.subject|truncatechars:30 }}</td>
+                    <td>
+                        {% if not msg.is_read %}
+                            <span class="badge bg-danger">Unread</span>
+                        {% elif not msg.is_responded %}
+                            <span class="badge bg-warning">Pending Reply</span>
+                        {% else %}
+                            <span class="badge bg-success">Responded</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ msg.submitted_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="/admin/portfolio/contactmessage/{{ msg.id }}/change/" class="btn btn-sm btn-primary">
+                            Reply
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No messages yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 10px 0 0 0;
+}
+
+.recent-messages {
+    margin-top: 30px;
+}
+
+.recent-messages table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recent-messages th, .recent-messages td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.recent-messages th {
+    background: #f8f9fa;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+</style>
+{% endblock %}

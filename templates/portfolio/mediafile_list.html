@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Media Files - {{ profile.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1>Media Files</h1>
+    
+    {% if mediafile_list %}
+        <div class="row">
+            {% for media in mediafile_list %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ media.title|default:"Untitled" }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            {{ media.file_type|title }}
+                            {% if media.category %} • {{ media.category }}{% endif %}
+                        </h6>
+                        <p class="card-text">{{ media.description|truncatechars:150 }}</p>
+                        <a href="{{ media.file.url }}" class="btn btn-primary" target="_blank">
+                            View/Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No media files available.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

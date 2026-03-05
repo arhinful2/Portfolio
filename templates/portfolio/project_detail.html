@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {{ project.title }} - {{ profile.full_name|default:"Portfolio" }}
+    </title>
+
+    <meta
+      name="description"
+      content="{{ project.description|striptags|truncatechars:160|default:profile.headline|default:'Professional portfolio project detail page' }}"
+    />
+    <meta
+      name="keywords"
+      content="{% if project.technologies %}{{ project.technologies }}{% elif system_config and system_config.seo_default_meta_keywords %}{{ system_config.seo_default_meta_keywords }}{% else %}portfolio, project, case study{% endif %}"
+    />
+    <meta
+      name="robots"
+      content="{{ system_config.seo_meta_robots|default:'index,follow' }}"
+    />
+    {% if system_config and system_config.seo_canonical_base_url %}
+    <link
+      rel="canonical"
+      href="{{ system_config.seo_canonical_base_url }}{{ request.path }}"
+    />
+    {% endif %}
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="{{ project.title }} - {{ profile.full_name|default:'Portfolio' }}"
+    />
+    <meta
+      property="og:description"
+      content="{{ project.description|striptags|truncatechars:160|default:profile.headline|default:'Professional project showcase' }}"
+    />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    {% if project.thumbnail %}
+    <meta property="og:image" content="{{ project.thumbnail.url }}" />
+    {% elif system_config and system_config.seo_og_image_url %}
+    <meta property="og:image" content="{{ system_config.seo_og_image_url }}" />
+    {% endif %}
+
+    <meta
+      name="twitter:card"
+      content="{{ system_config.seo_twitter_card|default:'summary_large_image' }}"
+    />
+    <meta
+      name="twitter:title"
+      content="{{ project.title }} - {{ profile.full_name|default:'Portfolio' }}"
+    />
+    <meta
+      name="twitter:description"
+      content="{{ project.description|striptags|truncatechars:160|default:profile.headline|default:'Professional project showcase' }}"
+    />
+    {% if project.thumbnail %}
+    <meta name="twitter:image" content="{{ project.thumbnail.url }}" />
+    {% elif system_config and system_config.seo_og_image_url %}
+    <meta name="twitter:image" content="{{ system_config.seo_og_image_url }}" />
+    {% endif %}
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      :root {
+          --primary-color: {{ profile.theme_color|default:'#0073b1' }};
+          --accent-color: {{ profile.accent_color|default:'#333333' }};
+          --bg-dark: #0f141b;
+          --card-bg: #1a212c;
+          --text-light: #d7dce2;
+          --muted: #9da6b2;
+          --border: #2b3646;
+      }
+
+      body {
+          background: linear-gradient(180deg, #0b1118 0%, #101822 100%);
+          padding-top: 20px;
+          color: var(--text-light);
+      }
+
+      .project-hero {
+          background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+          color: white;
+          border-radius: 15px;
+          padding: 40px;
+          margin-bottom: 30px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      }
+
+      .project-image {
+          max-height: 400px;
+          object-fit: cover;
+          border-radius: 10px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+
+      .tech-badge {
+          font-size: 0.9rem;
+          padding: 8px 15px;
+          margin: 5px;
+      }
+
+      .project-meta {
+          background: var(--card-bg);
+          border-radius: 10px;
+          padding: 20px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+          border: 1px solid var(--border);
+      }
+
+      .section-title {
+          border-left: 5px solid var(--primary-color);
+          padding-left: 15px;
+          margin-bottom: 25px;
+          color: var(--text-light);
+      }
+
+      .card,
+      .navbar,
+      .list-group-item {
+          background-color: var(--card-bg) !important;
+          color: var(--text-light);
+          border-color: var(--border);
+      }
+
+      .text-muted {
+          color: var(--muted) !important;
+      }
+
+      .navbar-brand {
+          color: var(--text-light) !important;
+      }
+
+      .btn-outline-secondary,
+      .btn-outline-primary {
+          border-color: var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Navigation -->
+      <nav
+        class="navbar navbar-expand-lg navbar-light bg-white mb-4 rounded shadow-sm"
+      >
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">
+            <i class="fas fa-arrow-left"></i> Back to Portfolio
+          </a>
+        </div>
+      </nav>
+
+      <!-- Project Header -->
+      <div class="project-hero">
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <h1 class="display-4 fw-bold mb-3">{{ project.title }}</h1>
+
+            {% if project.description %}
+            <div class="lead mb-4">
+              {{ project.description|safe|truncatewords:50 }}
+            </div>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-2">
+              {% if project.project_url %}
+              <a
+                href="{{ project.project_url }}"
+                target="_blank"
+                class="btn btn-light btn-lg"
+              >
+                <i class="fas fa-external-link-alt"></i> Live Demo
+              </a>
+              {% endif %} {% if project.github_url %}
+              <a
+                href="{{ project.github_url }}"
+                target="_blank"
+                class="btn btn-dark btn-lg"
+              >
+                <i class="fab fa-github"></i> GitHub
+              </a>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if project.thumbnail %}
+          <div class="col-lg-4 text-center">
+            <img
+              src="{{ project.thumbnail.url }}"
+              alt="{{ project.title }}"
+              class="img-fluid project-image"
+            />
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+          <!-- Project Description -->
+          <div class="card mb-4">
+            <div class="card-body">
+              <h3 class="section-title">Project Description</h3>
+              <div class="project-content">{{ project.description|safe }}</div>
+            </div>
+          </div>
+
+          <!-- Technologies -->
+          {% if project.technologies %}
+          <div class="card mb-4">
+            <div class="card-body">
+              <h3 class="section-title">Technologies Used</h3>
+              <div class="d-flex flex-wrap">
+                {% for tech in project.get_technologies_list %}
+                <span class="badge bg-primary tech-badge">
+                  <i class="fas fa-code"></i> {{ tech }}
+                </span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+          <!-- Project Info -->
+          <div class="project-meta mb-4">
+            <h4 class="mb-4">
+              <i class="fas fa-info-circle text-primary"></i> Project Details
+            </h4>
+
+            <div class="mb-3">
+              <strong><i class="fas fa-calendar-alt"></i> Timeline:</strong
+              ><br />
+              <span class="text-muted">
+                {{ project.start_date|date:"F Y" }} {% if project.end_date %} -
+                {{ project.end_date|date:"F Y" }} {% elif project.is_ongoing %}
+                - Present {% endif %}
+              </span>
+            </div>
+
+            {% if project.featured %}
+            <div class="mb-3">
+              <span class="badge bg-warning text-dark">
+                <i class="fas fa-star"></i> Featured Project
+              </span>
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <strong><i class="fas fa-tags"></i> Status:</strong><br />
+              <span class="text-muted">
+                {% if project.is_completed %}
+                <span class="badge bg-success">Completed</span>
+                {% elif project.is_ongoing %}
+                <span class="badge bg-info">Ongoing</span>
+                {% else %}
+                <span class="badge bg-secondary">In Progress</span>
+                {% endif %}
+              </span>
+            </div>
+
+            <!-- Links -->
+            <div class="mt-4">
+              <h5><i class="fas fa-link"></i> Project Links</h5>
+              <div class="list-group">
+                {% if project.project_url %}
+                <a
+                  href="{{ project.project_url }}"
+                  target="_blank"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fas fa-external-link-alt text-primary"></i> Live
+                  Demo
+                </a>
+                {% endif %} {% if project.github_url %}
+                <a
+                  href="{{ project.github_url }}"
+                  target="_blank"
+                  class="list-group-item list-group-item-action"
+                >
+                  <i class="fab fa-github text-dark"></i> GitHub Repository
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Related Info -->
+          <div class="project-meta">
+            <h5><i class="fas fa-user-circle"></i> About the Developer</h5>
+            {% if profile %}
+            <div class="d-flex align-items-center mt-3">
+              {% if profile.profile_image %}
+              <img
+                src="{{ profile.profile_image.url }}"
+                alt="{{ profile.full_name }}"
+                class="rounded-circle me-3"
+                style="width: 60px; height: 60px; object-fit: cover"
+              />
+              {% endif %}
+              <div>
+                <h6 class="mb-1">{{ profile.full_name }}</h6>
+                <small class="text-muted">{{ profile.headline }}</small>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <a href="/" class="btn btn-outline-primary btn-sm w-100">
+                <i class="fas fa-portrait"></i> View Full Portfolio
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Media Section -->
+      {% if project.media_files.exists %}
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="section-title">Project Media</h3>
+              <div class="row">
+                {% for media in project.media_files.all %}
+                <div class="col-md-3 col-sm-6 mb-3">
+                  {% if media.file_type == 'image' %}
+                  <a
+                    href="javascript:void(0)"
+                    class="media-full-view"
+                    data-type="image"
+                    data-src="{{ media.file.url }}"
+                    data-title="{{ media.title|default:'Image' }}"
+                  >
+                    <img
+                      src="{{ media.file.url }}"
+                      alt="{{ media.title }}"
+                      class="img-fluid rounded"
+                      style="height: 150px; object-fit: cover"
+                    />
+                  </a>
+                  {% elif media.file_type == 'video' %}
+                  <video
+                    controls
+                    style="
+                      width: 100%;
+                      height: 150px;
+                      object-fit: cover;
+                      border-radius: 8px;
+                    "
+                  >
+                    <source src="{{ media.file.url }}" />
+                  </video>
+                  {% elif media.file_type == 'audio' %}
+                  <div
+                    class="p-3 rounded"
+                    style="background: #151d2b; border: 1px solid #2b3646"
+                  >
+                    <p class="mb-2">
+                      <i class="fas fa-music"></i> {{ media.title|default:"Audio file" }}
+                    </p>
+                    <audio controls style="width: 100%">
+                      <source src="{{ media.file.url }}" />
+                    </audio>
+                  </div>
+                  {% elif media.file_type == 'pdf' or media.file_type == 'document' %}
+                  <a
+                    href="javascript:void(0)"
+                    class="media-full-view d-flex flex-column justify-content-center align-items-center rounded"
+                    data-type="document"
+                    data-src="{{ media.file.url }}"
+                    data-title="{{ media.title|default:'Document' }}"
+                    style="
+                      height: 150px;
+                      background: #151d2b;
+                      border: 1px solid #2b3646;
+                      text-decoration: none;
+                      color: #d7dce2;
+                    "
+                  >
+                    <i class="fas fa-file-pdf fa-2x mb-2"></i>
+                    <span>{{ media.title|default:"Open document" }}</span>
+                  </a>
+                  {% else %}
+                  <a
+                    href="{{ media.file.url }}"
+                    target="_blank"
+                    class="d-flex flex-column justify-content-center align-items-center rounded"
+                    style="
+                      height: 150px;
+                      background: #151d2b;
+                      border: 1px solid #2b3646;
+                      text-decoration: none;
+                      color: #d7dce2;
+                    "
+                  >
+                    <i class="fas fa-file fa-2x mb-2"></i>
+                    <span>{{ media.title|default:"Open file" }}</span>
+                  </a>
+                  {% endif %}
+                  <small class="d-block mt-2 text-muted"
+                    >{{ media.title|default:media.file_type|title }}</small
+                  >
+                  <div class="d-flex gap-2 mt-2">
+                    <a
+                      href="{{ media.file.url }}"
+                      target="_blank"
+                      class="btn btn-sm btn-outline-primary w-100"
+                    >
+                      <i class="fas fa-expand"></i> Full View
+                    </a>
+                    {% if project.allow_media_download and media.allow_download %}
+                    <a
+                      href="{{ media.file.url }}"
+                      download
+                      class="btn btn-sm btn-outline-success w-100"
+                    >
+                      <i class="fas fa-download"></i> Download
+                    </a>
+                    {% else %}
+                    <button
+                      class="btn btn-sm btn-outline-secondary w-100"
+                      disabled
+                    >
+                      <i class="fas fa-lock"></i> Download Locked
+                    </button>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div
+        class="modal fade"
+        id="mediaPreviewModal"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div
+            class="modal-content"
+            style="background: #111827; color: #d7dce2"
+          >
+            <div class="modal-header" style="border-color: #2b3646">
+              <h5 class="modal-title" id="mediaPreviewTitle">Media Preview</h5>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body" id="mediaPreviewBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="d-flex justify-content-between">
+            <a href="/" class="btn btn-outline-secondary">
+              <i class="fas fa-home"></i> Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-5 pt-4 border-top text-center text-muted">
+        <p>
+          &copy; {% now "Y" %} {{ profile.full_name|default:"Portfolio" }} {% if profile.location %} · <i class="fas fa-map-marker-alt"></i> {{ profile.location }} {% endif %}
+        </p>
+      </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Add lightbox functionality for images
+      document.addEventListener("DOMContentLoaded", function () {
+        // Make project images clickable for lightbox effect
+        const images = document.querySelectorAll(".project-content img");
+        images.forEach((img) => {
+          img.style.cursor = "pointer";
+          img.addEventListener("click", function () {
+            window.open(this.src, "_blank");
+          });
+        });
+
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute("href"));
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth" });
+            }
+          });
+        });
+
+        const previewModalElement =
+          document.getElementById("mediaPreviewModal");
+        const previewBody = document.getElementById("mediaPreviewBody");
+        const previewTitle = document.getElementById("mediaPreviewTitle");
+        const previewModal = previewModalElement
+          ? new bootstrap.Modal(previewModalElement)
+          : null;
+
+        document.querySelectorAll(".media-full-view").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            if (!previewModal) return;
+
+            const type = this.getAttribute("data-type");
+            const src = this.getAttribute("data-src");
+            const title = this.getAttribute("data-title") || "Media Preview";
+            previewTitle.textContent = title;
+
+            if (type === "image") {
+              previewBody.innerHTML = `<img src="${src}" class="img-fluid rounded" style="max-height:75vh;display:block;margin:auto;" />`;
+            } else if (type === "document") {
+              previewBody.innerHTML = `<iframe src="${src}" style="width:100%;height:75vh;border:none;border-radius:8px;"></iframe>`;
+            } else {
+              previewBody.innerHTML = `<a href="${src}" target="_blank" class="btn btn-primary">Open File</a>`;
+            }
+
+            previewModal.show();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

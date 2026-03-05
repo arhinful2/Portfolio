@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Gallery - {{ profile.full_name|default:"Portfolio" }}</title>
+    <meta
+      name="description"
+      content="Professional media gallery for {{ profile.full_name|default:'portfolio owner' }} showcasing uploaded work samples and assets."
+    />
+    <meta
+      name="keywords"
+      content="{{ system_config.seo_default_meta_keywords|default:'portfolio, media gallery, project assets, showcase' }}"
+    />
+    <meta
+      name="robots"
+      content="{{ system_config.seo_meta_robots|default:'index,follow' }}"
+    />
+    {% if system_config and system_config.seo_canonical_base_url %}
+    <link
+      rel="canonical"
+      href="{{ system_config.seo_canonical_base_url }}{{ request.path }}"
+    />
+    {% endif %}
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Media Gallery - {{ profile.full_name|default:'Portfolio' }}"
+    />
+    <meta
+      property="og:description"
+      content="Browse media files and project assets from {{ profile.full_name|default:'this professional portfolio' }}."
+    />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    {% if system_config and system_config.seo_og_image_url %}
+    <meta property="og:image" content="{{ system_config.seo_og_image_url }}" />
+    {% elif profile.profile_image %}
+    <meta property="og:image" content="{{ profile.profile_image.url }}" />
+    {% endif %}
+
+    <meta
+      name="twitter:card"
+      content="{{ system_config.seo_twitter_card|default:'summary_large_image' }}"
+    />
+    <meta
+      name="twitter:title"
+      content="Media Gallery - {{ profile.full_name|default:'Portfolio' }}"
+    />
+    <meta
+      name="twitter:description"
+      content="Browse media files and project assets from {{ profile.full_name|default:'this professional portfolio' }}."
+    />
+    {% if system_config and system_config.seo_og_image_url %}
+    <meta name="twitter:image" content="{{ system_config.seo_og_image_url }}" />
+    {% elif profile.profile_image %}
+    <meta name="twitter:image" content="{{ profile.profile_image.url }}" />
+    {% endif %}
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      :root {
+          --primary-color: {{ profile.theme_color|default:'#0073b1' }};
+          --accent-color: {{ profile.accent_color|default:'#333333' }};
+          --bg-dark: #0f141b;
+          --card-bg: #1a212c;
+          --text-light: #d7dce2;
+          --muted: #9da6b2;
+          --border: #2b3646;
+      }
+
+      body {
+          background: linear-gradient(180deg, #0b1118 0%, #101822 100%);
+          padding-top: 20px;
+          color: var(--text-light);
+      }
+
+      .card,
+      .navbar,
+      .alert {
+          background-color: var(--card-bg) !important;
+          color: var(--text-light);
+          border: 1px solid var(--border);
+      }
+
+      .text-muted {
+          color: var(--muted) !important;
+      }
+
+      .navbar-brand,
+      .card-title,
+      .display-5 {
+          color: var(--text-light) !important;
+      }
+
+      .btn-outline-secondary {
+          color: var(--text-light);
+          border-color: var(--border);
+      }
+
+      .media-card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          height: 100%;
+          border: 1px solid var(--border);
+      }
+
+      .media-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 14px 28px rgba(0,0,0,0.35);
+      }
+
+      .media-image {
+          height: 200px;
+          object-fit: cover;
+      }
+
+      .file-type-badge {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+      }
+
+      .filter-btn.active {
+          background-color: var(--primary-color);
+          color: #ffffff;
+          border-color: var(--primary-color);
+      }
+
+      .btn-outline-primary {
+          color: var(--primary-color);
+          border-color: var(--primary-color);
+      }
+
+      .btn-outline-primary:hover,
+      .btn-outline-success:hover {
+          color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Navigation -->
+      <nav class="navbar navbar-expand-lg mb-4 rounded shadow-sm">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">
+            <i class="fas fa-home"></i> Home
+          </a>
+        </div>
+      </nav>
+
+      <!-- Header -->
+      <div class="row mb-4" ,style="color:blue">
+        <div class="col-12">
+          <h1 class="display-5">
+            <i class="fas fa-images text-primary"></i> Media Gallery
+          </h1>
+          <p class="text-muted">
+            Browse all uploaded media files {% if profile %} for
+            <strong>{{ profile.full_name }}</strong>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- File Type Filter -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-filter"></i> Filter by File Type
+              </h5>
+              <div class="btn-group flex-wrap" role="group">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn active"
+                  data-type="all"
+                >
+                  <i class="fas fa-layer-group"></i> All
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="image"
+                >
+                  <i class="fas fa-image"></i> Images
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="video"
+                >
+                  <i class="fas fa-video"></i> Videos
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="audio"
+                >
+                  <i class="fas fa-music"></i> Audio
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="pdf"
+                >
+                  <i class="fas fa-file-pdf"></i> PDFs
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="document"
+                >
+                  <i class="fas fa-file-word"></i> Documents
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary filter-btn"
+                  data-type="psd"
+                >
+                  <i class="fas fa-paint-brush"></i> Design Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Media Grid -->
+      <div class="row" id="mediaGrid">
+        {% if media_files %} {% for media in media_files %}
+        <div
+          class="col-md-4 col-lg-3 mb-4 media-item"
+          data-type="{{ media.file_type }}"
+        >
+          <div class="card media-card h-100">
+            <!-- File Type Badge -->
+            <span
+              class="badge file-type-badge {% if media.file_type == 'image' %}bg-primary {% elif media.file_type == 'video' %}bg-danger {% elif media.file_type == 'audio' %}bg-success {% elif media.file_type == 'pdf' %}bg-warning text-dark {% elif media.file_type == 'document' %}bg-info {% else %}bg-secondary{% endif %}"
+            >
+              {{ media.file_type|upper }}
+            </span>
+
+            <!-- Media Preview -->
+            <div class="text-center p-3">
+              {% if media.file_type == 'image' %}
+              <img
+                src="{{ media.file.url }}"
+                class="img-fluid rounded media-image"
+                alt="{{ media.title|default:'Image' }}"
+                style="max-height: 150px"
+              />
+              {% elif media.file_type == 'video' %}
+              <div
+                class="bg-dark text-white rounded d-flex align-items-center justify-content-center"
+                style="height: 150px"
+              >
+                <i class="fas fa-play-circle fa-3x"></i>
+              </div>
+              {% elif media.file_type == 'audio' %}
+              <div
+                class="bg-success text-white rounded d-flex align-items-center justify-content-center"
+                style="height: 150px"
+              >
+                <i class="fas fa-volume-up fa-3x"></i>
+              </div>
+              {% elif media.file_type == 'pdf' %}
+              <div
+                class="bg-danger text-white rounded d-flex align-items-center justify-content-center"
+                style="height: 150px"
+              >
+                <i class="fas fa-file-pdf fa-3x"></i>
+              </div>
+              {% elif media.file_type in 'psd,ai,figma,sketch' %}
+              <div
+                class="bg-warning text-dark rounded d-flex align-items-center justify-content-center"
+                style="height: 150px"
+              >
+                <i class="fas fa-paint-brush fa-3x"></i>
+              </div>
+              {% else %}
+              <div
+                class="bg-secondary text-white rounded d-flex align-items-center justify-content-center"
+                style="height: 150px"
+              >
+                <i class="fas fa-file fa-3x"></i>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Media Info -->
+            <div class="card-body">
+              <h6 class="card-title">{{ media.title|default:"Untitled" }}</h6>
+
+              {% if media.description %}
+              <p class="card-text small text-muted">
+                {{ media.description|truncatechars:100 }}
+              </p>
+              {% endif %} {% if media.category %}
+              <span class="badge bg-light text-dark mb-2">
+                {{ media.category }}
+              </span>
+              {% endif %}
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-2"
+              >
+                <small class="text-muted">
+                  <i class="fas fa-calendar-alt"></i>
+                  {{ media.uploaded_at|date:"M d, Y" }}
+                </small>
+
+                {% if media.file_size %}
+                <small class="text-muted">
+                  <i class="fas fa-hdd"></i>
+                  {{ media.file_size }}
+                </small>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-footer bg-transparent">
+              <div class="btn-group w-100" role="group">
+                <a
+                  href="{{ media.file.url }}"
+                  class="btn btn-sm btn-outline-primary"
+                  target="_blank"
+                >
+                  <i class="fas fa-external-link-alt"></i> View
+                </a>
+                <a
+                  href="{{ media.file.url }}"
+                  class="btn btn-sm btn-outline-success"
+                  download
+                >
+                  <i class="fas fa-download"></i> Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %} {% else %}
+        <div class="col-12">
+          <div class="alert alert-info">
+            <h4 class="alert-heading">
+              <i class="fas fa-info-circle"></i> No Media Files Found
+            </h4>
+            <p>No media files have been uploaded yet.</p>
+            {% if user.is_authenticated %}
+            <hr />
+            <a
+              href="/admin/portfolio/mediafile/add/"
+              class="btn btn-primary"
+              target="_blank"
+            >
+              <i class="fas fa-upload"></i> Upload Media Files
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Pagination -->
+      {% if is_paginated %}
+      <div class="row mt-4">
+        <div class="col-12">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">
+                  <i class="fas fa-angle-double-left"></i> First
+                </a>
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ page_obj.previous_page_number }}"
+                >
+                  <i class="fas fa-angle-left"></i> Previous
+                </a>
+              </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+              </li>
+
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ page_obj.next_page_number }}"
+                >
+                  Next <i class="fas fa-angle-right"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="?page={{ page_obj.paginator.num_pages }}"
+                >
+                  Last <i class="fas fa-angle-double-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Statistics -->
+      {% if media_by_type %}
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-pie"></i> Media Statistics
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for type, items in media_by_type.items %}
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                  <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-3 me-3">
+                      {% if type == 'image' %}
+                      <i class="fas fa-image text-primary fa-2x"></i>
+                      {% elif type == 'video' %}
+                      <i class="fas fa-video text-danger fa-2x"></i>
+                      {% elif type == 'audio' %}
+                      <i class="fas fa-music text-success fa-2x"></i>
+                      {% elif type == 'pdf' %}
+                      <i class="fas fa-file-pdf text-warning fa-2x"></i>
+                      {% elif type == 'document' %}
+                      <i class="fas fa-file-word text-info fa-2x"></i>
+                      {% else %}
+                      <i class="fas fa-file text-secondary fa-2x"></i>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <h4 class="mb-0">{{ items|length }}</h4>
+                      <small class="text-muted">{{ type|title }} Files</small>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Filter Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Filter buttons
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        const mediaItems = document.querySelectorAll(".media-item");
+
+        filterButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            // Update active button
+            filterButtons.forEach((btn) => btn.classList.remove("active"));
+            this.classList.add("active");
+
+            const filterType = this.getAttribute("data-type");
+
+            // Filter media items
+            mediaItems.forEach((item) => {
+              if (
+                filterType === "all" ||
+                item.getAttribute("data-type") === filterType
+              ) {
+                item.style.display = "block";
+              } else {
+                item.style.display = "none";
+              }
+            });
+          });
+        });
+
+        // Show file sizes if available
+        document.querySelectorAll("a[download]").forEach((link) => {
+          fetch(link.href, { method: "HEAD" })
+            .then((response) => {
+              const size = response.headers.get("content-length");
+              if (size) {
+                const sizeMB = (size / (1024 * 1024)).toFixed(2);
+                link.innerHTML += ` (${sizeMB} MB)`;
+              }
+            })
+            .catch((error) => console.log("Error getting file size:", error));
+        });
+      });
+    </script>
+  </body>
+</html>

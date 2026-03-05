@@ -1,0 +1,304 @@
+<!doctype html>
+{% load static %}
+<html
+  lang="en"
+  data-theme-color="{{ portfolio_profile.theme_color|default:'#0073b1' }}"
+  data-accent-color="{{ portfolio_profile.accent_color|default:'#333333' }}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %} 
+      {% if system_config and system_config.seo_default_meta_title %} 
+      {{ system_config.seo_default_meta_title }} 
+      {% elif portfolio_profile %} 
+      {{ portfolio_profile.full_name }} Portfolio {% else %} Professional Portfolio
+      {% endif %} {% endblock %}
+    </title>
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="{% block meta_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Professional portfolio website' }}{% endblock %}"
+    />
+    <meta
+      name="keywords"
+      content="{% block meta_keywords %}{{ system_config.seo_default_meta_keywords|default:'portfolio, developer, designer, professional, resume' }}{% endblock %}"
+    />
+    <meta
+      name="author"
+      content="{{ system_config.seo_site_name|default:portfolio_profile.full_name|default:'Portfolio Owner' }}"
+    />
+    <meta
+      name="robots"
+      content="{{ system_config.seo_meta_robots|default:'index,follow' }}"
+    />
+    {% block canonical_tag %} {% if system_config and system_config.seo_canonical_base_url %}
+    <link
+      rel="canonical"
+      href="{{ system_config.seo_canonical_base_url }}{{ request.path }}"
+    />
+    {% endif %} {% endblock %}
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="{% block og_title %}{{ system_config.seo_default_meta_title|default:portfolio_profile.full_name|default:'Professional Portfolio' }}{% endblock %}"
+    />
+    <meta
+      property="og:description"
+      content="{% block og_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Check out my professional portfolio' }}{% endblock %}"
+    />
+    <meta
+      property="og:site_name"
+      content="{{ system_config.seo_site_name|default:portfolio_profile.full_name|default:'Professional Portfolio' }}"
+    />
+    <meta property="og:url" content="{{ request.build_absolute_uri }}" />
+    {% if system_config and system_config.seo_og_image_url %}
+    <meta property="og:image" content="{{ system_config.seo_og_image_url }}" />
+    {% elif portfolio_profile.profile_image %}
+    <meta
+      property="og:image"
+      content="{{ portfolio_profile.profile_image.url }}"
+    />
+    {% endif %}
+
+    <!-- Twitter -->
+    <meta
+      name="twitter:card"
+      content="{{ system_config.seo_twitter_card|default:'summary_large_image' }}"
+    />
+    <meta
+      name="twitter:title"
+      content="{% block twitter_title %}{{ system_config.seo_default_meta_title|default:portfolio_profile.full_name|default:'Professional Portfolio' }}{% endblock %}"
+    />
+    <meta
+      name="twitter:description"
+      content="{% block twitter_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Check out my professional portfolio' }}{% endblock %}"
+    />
+    {% if system_config and system_config.seo_og_image_url %}
+    <meta name="twitter:image" content="{{ system_config.seo_og_image_url }}" />
+    {% elif portfolio_profile.profile_image %}
+    <meta
+      name="twitter:image"
+      content="{{ portfolio_profile.profile_image.url }}"
+    />
+    {% endif %}
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{% static 'images/favicon.ico' %}"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Animate.css for animations -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <!-- Theme Variables -->
+    <style>
+      :root {
+          --primary-color: {{ portfolio_profile.theme_color|default:'#0073b1' }};
+          --primary-dark: {% widthratio portfolio_profile.theme_color|default:'#0073b1' 100 80 %};
+          --primary-light: {% widthratio portfolio_profile.theme_color|default:'#0073b1' 100 120 %};
+          --accent-color: {{ portfolio_profile.accent_color|default:'#333333' }};
+          --text-color: #333333;
+          --text-light: #666666;
+          --bg-color: #ffffff;
+          --bg-light: #f8f9fa;
+          --border-color: #e0e0e0;
+          --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+          --transition: all 0.3s ease;
+          --border-radius: 8px;
+      }
+
+      .dark-mode {
+          --text-color: #ffffff;
+          --text-light: #b0b0b0;
+          --bg-color: #121212;
+          --bg-light: #1e1e1e;
+          --border-color: #333333;
+          --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+          --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container">
+        <a href="{% url 'portfolio_home' %}" class="logo">
+          <span class="logo-text"
+            >{{ portfolio_profile.first_name|default:'Portfolio' }}</span
+          >
+        </a>
+
+        <div class="nav-links">
+          <a href="#about" class="nav-link">About</a>
+          {% if portfolio_visibility and portfolio_visibility.show_experience %}
+          <a href="#experience" class="nav-link">Experience</a>
+          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
+          <a href="#education" class="nav-link">Education</a>
+          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
+          <a href="#projects" class="nav-link">Projects</a>
+          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
+          <a href="#skills" class="nav-link">Skills</a>
+          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
+          <a href="{% url 'media_gallery' %}" class="nav-link">Media</a>
+          {% endif %}
+
+          <a href="#contact" class="nav-link">Contact</a>
+
+          <!-- Dark Mode Toggle -->
+          <button id="darkModeToggle" class="dark-mode-toggle">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+
+        <button class="mobile-menu-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+      <a href="#about" class="mobile-nav-link">About</a>
+      {% if portfolio_visibility and portfolio_visibility.show_experience %}
+      <a href="#experience" class="mobile-nav-link">Experience</a>
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
+      <a href="#education" class="mobile-nav-link">Education</a>
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
+      <a href="#projects" class="mobile-nav-link">Projects</a>
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
+      <a href="#skills" class="mobile-nav-link">Skills</a>
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
+      <a href="{% url 'media_gallery' %}" class="mobile-nav-link">Media</a>
+      {% endif %}
+      <a href="#contact" class="mobile-nav-link">Contact</a>
+    </div>
+
+    <!-- Mobile Menu Backdrop -->
+    <div class="mobile-menu-backdrop"></div>
+
+    <!-- Main Content -->
+    <main>{% block content %}{% endblock %}</main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>{{ portfolio_profile.full_name|default:'Portfolio' }}</h3>
+            <p>
+              {{ portfolio_profile.headline|default:'Professional Portfolio' }}
+            </p>
+          </div>
+
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <a href="#about">About</a>
+            <a href="#experience">Experience</a>
+            <a href="#education">Education</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+          </div>
+
+          <div class="footer-section">
+            <h4>Connect</h4>
+            <div class="social-links">
+              {% if portfolio_profile.linkedin %}
+              <a
+                href="{{ portfolio_profile.linkedin }}"
+                target="_blank"
+                class="social-link"
+              >
+                <i class="fab fa-linkedin"></i>
+              </a>
+              {% endif %} {% if portfolio_profile.github %}
+              <a
+                href="{{ portfolio_profile.github }}"
+                target="_blank"
+                class="social-link"
+              >
+                <i class="fab fa-github"></i>
+              </a>
+              {% endif %} {% if portfolio_profile.twitter %}
+              <a
+                href="{{ portfolio_profile.twitter }}"
+                target="_blank"
+                class="social-link"
+              >
+                <i class="fab fa-twitter"></i>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; {% now "Y" %} {{ portfolio_profile.full_name|default:'Portfolio Owner' }}. All rights
+            reserved.
+          </p>
+          <p class="built-with">Built with Elechemobiophy</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+      // Initialize AOS (Animate On Scroll)
+      AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100,
+      });
+
+      // Smooth scrolling
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href === "#") return;
+
+          e.preventDefault();
+          const targetElement = document.querySelector(href);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: "smooth",
+            });
+          }
+        });
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
