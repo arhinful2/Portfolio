@@ -584,10 +584,10 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
     runtime_database_badge.short_description = 'Current Active DB'  # type: ignore
 
     def professional_setup_tips(self, obj):
-        return format_html(
-            '<div style="padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;line-height:1.5;">'
-            '<strong>Professional Setup Tips</strong>'
-            '<ul style="margin:8px 0 0 18px;">'
+        return mark_safe(
+            '<div style="padding:14px 16px;background:#f9fafb;border:1px solid #cbd5e1;border-radius:10px;line-height:1.65;color:#0f172a;font-size:14px;">'
+            '<strong style="display:block;font-size:15px;margin-bottom:8px;color:#0b1220;">Professional Setup Tips</strong>'
+            '<ul style="margin:0 0 0 20px;padding:0;">'
             '<li>Keep only one configuration active at a time.</li>'
             '<li>Use SQLite during local development and switch to PostgreSQL for production.</li>'
             '<li>After changing database settings, restart the server to apply updates.</li>'
