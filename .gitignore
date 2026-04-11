@@ -1,0 +1,29 @@
+# Ignore images
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.svg
+
+# Ignore videos
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Ignore audio
+*.mp3
+*.wav
+
+# Ignore compressed files
+*.zip
+*.rar
+*.7z
+
+# Ignore specific folders (example)
+/media/
+/videos/
+/images/
+
+media/uploads/*.pdf
