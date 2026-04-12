@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import json
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +23,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qj-hj@j(ga!y@b6eg*ii%*)wx#!05no@=jbyq)tyt(py-7*ld$'
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY', 'django-insecure-qj-hj@j(ga!y@b6eg*ii%*)wx#!05no@=jbyq)tyt(py-7*ld$')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+DEBUG = env_bool('DJANGO_DEBUG', True)
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
+    if host.strip()
+] or ['localhost', '127.0.0.1', '.vercel.app']
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 
 # Application definition
@@ -50,6 +71,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,8 +79,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'whitenoise.middleware.WhiteNoiseMiddleware',#
-    'portfolio.debug_middleware.PrintPostMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE.append('portfolio.debug_middleware.PrintPostMiddleware')
 
 ROOT_URLCONF = 'portfolio_core.urls'
 
@@ -111,7 +135,28 @@ DATABASES = {
     }
 }
 
-if runtime_db_config and runtime_db_config.get('database_engine') == 'postgresql':
+
+def database_config_from_url(database_url):
+    parsed = urlparse(database_url)
+    if parsed.scheme in {'postgres', 'postgresql'}:
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': parsed.path.lstrip('/'),
+            'USER': parsed.username or '',
+            'PASSWORD': parsed.password or '',
+            'HOST': parsed.hostname or '',
+            'PORT': str(parsed.port or 5432),
+        }
+    return None
+
+
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    url_database_config = database_config_from_url(database_url)
+    if url_database_config:
+        DATABASES['default'] = url_database_config
+
+elif runtime_db_config and runtime_db_config.get('database_engine') == 'postgresql':
     required_keys = ['database_name', 'database_user',
                      'database_password', 'database_host']
     has_required_values = all(runtime_db_config.get(key)
@@ -210,15 +255,17 @@ os.makedirs(os.path.join(BASE_DIR, 'templates/portfolio'), exist_ok=True)
 
 # Email configuration for development
 # Prints emails to terminal
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'yourportfolio@example.com'
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+)
+DEFAULT_FROM_EMAIL = os.getenv(
+    'DEFAULT_FROM_EMAIL', 'yourportfolio@example.com')
 
 # Console email output settings
-EMAIL_USE_TLS = False
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025  # MailHog port if you want to use MailHog
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-
-# Print to terminal settings
-DEBUG = True  # Ensure this is True
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '1025'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
