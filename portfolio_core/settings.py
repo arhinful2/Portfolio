@@ -224,6 +224,12 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# File storage backend (Vercel Blob for production, local filesystem for development)
+if os.getenv('VERCEL'):
+    DEFAULT_FILE_STORAGE = 'portfolio.storage_backends.VercelBlobStorage'
+else:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 # TinyMCE Configuration
 TINYMCE_DEFAULT_CONFIG = {
     'height': 360,
