@@ -1,5 +1,6 @@
-{
+{   
     "version": 2,
+    "buildCommand": "python manage.py migrate",
     "builds": [
         {
             "src": "api/index.py",
@@ -12,4 +13,5 @@
             "dest": "api/index.py"
         }
     ]
+
 }
