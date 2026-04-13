@@ -36,7 +36,7 @@ def env_bool(name, default=False):
     return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
-DEBUG = env_bool('DJANGO_DEBUG', True)
+DEBUG = env_bool('DJANGO_DEBUG', not bool(os.getenv('VERCEL')))
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -49,6 +49,9 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+
+if os.getenv('VERCEL') and not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
 
 # Application definition
@@ -150,7 +153,7 @@ def database_config_from_url(database_url):
     return None
 
 
-database_url = os.getenv('DATABASE_URL')
+database_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
 if database_url:
     url_database_config = database_config_from_url(database_url)
     if url_database_config:
