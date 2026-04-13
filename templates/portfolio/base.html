@@ -247,6 +247,22 @@
               >
                 <i class="fab fa-twitter"></i>
               </a>
+              {% endif %} {% if portfolio_profile.whatsapp %}
+              <a
+                href="{{ portfolio_profile.whatsapp }}"
+                target="_blank"
+                class="social-link"
+              >
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              {% endif %} {% if portfolio_profile.behance %}
+              <a
+                href="{{ portfolio_profile.behance }}"
+                target="_blank"
+                class="social-link"
+              >
+                <i class="fab fa-behance"></i>
+              </a>
               {% endif %}
             </div>
           </div>
@@ -261,7 +277,6 @@
         </div>
       </div>
     </footer>
-
     <!-- JavaScript -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="{% static 'js/main.js' %}"></script>

@@ -58,6 +58,8 @@ class Profile(models.Model):
         blank=True, null=True, verbose_name="LinkedIn URL")
     github = models.URLField(blank=True, null=True, verbose_name="GitHub URL")
     twitter = models.URLField(blank=True, null=True)
+    whatsapp = models.URLField(blank=True, null=True, verbose_name="WhatsApp URL")
+    behance = models.URLField(blank=True, null=True, verbose_name="Behance URL")
     instagram = models.URLField(blank=True, null=True)
     facebook = models.URLField(blank=True, null=True)
 

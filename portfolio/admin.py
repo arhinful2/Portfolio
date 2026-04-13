@@ -31,7 +31,7 @@ class ProfileInline(admin.StackedInline):
             'fields': ('email', 'phone', 'location', 'website')
         }),
         ('Social Links', {
-            'fields': ('linkedin', 'github', 'twitter', 'instagram', 'facebook')
+            'fields': ('linkedin', 'github', 'twitter', 'whatsapp', 'behance', 'instagram', 'facebook')
         }),
         ('Customization', {
             'fields': ('theme_color', 'accent_color', 'show_phone', 'show_email')
@@ -152,7 +152,7 @@ class ProfileAdmin(admin.ModelAdmin):
             'fields': ('email', 'phone', 'location', 'website')
         }),
         ('Social Links', {
-            'fields': ('linkedin', 'github', 'twitter', 'instagram', 'facebook')
+            'fields': ('linkedin', 'github', 'twitter', 'whatsapp', 'behance', 'instagram', 'facebook')
         }),
         ('Customization', {
             'fields': ('theme_color', 'accent_color', 'show_phone', 'show_email')

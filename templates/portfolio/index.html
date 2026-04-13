@@ -1,40 +1,31 @@
-{% extends 'portfolio/base.html' %} 
-{% load static %} 
-{% block title %} 
-{% if system_config and system_config.seo_default_meta_title %} 
+{% extends 'portfolio/base.html' %} {% load static %} 
+{% block title %} {% if system_config and system_config.seo_default_meta_title %} 
 {{ system_config.seo_default_meta_title }} 
 {% elif portfolio_profile and portfolio_profile.full_name %} 
 {{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} {% endblock %} 
-{% block meta_description %} 
-{% if system_config and system_config.seo_default_meta_description %} 
-{{ system_config.seo_default_meta_description }} 
-{% elif portfolio_profile and portfolio_profile.headline %} 
-{{ portfolio_profile.headline }} 
-{% else %} Professional portfolio showcasing projects, experience, skills, and contact
-information. 
+{% block meta_description %} {% if system_config and system_config.seo_default_meta_description %} 
+{{ system_config.seo_default_meta_description }} {% elif portfolio_profile and portfolio_profile.headline %} {{ portfolio_profile.headline }} {% else %}
+Professional portfolio showcasing projects, experience, skills, and contact information. 
 {% endif %} 
-{% endblock %} 
-{% block meta_keywords %} 
+{% endblock %} {% block meta_keywords %} 
 {% if system_config and system_config.seo_default_meta_keywords %} 
 {{ system_config.seo_default_meta_keywords }} 
-{% else %} 
-portfolio, web developer, projects, experience, skills, professional profile 
-{% endif %} 
+{% else %} portfolio, web developer, projects, experience, skills, professional profile {% endif %} 
 {% endblock %} 
 {% block og_title %} 
 {% if portfolio_profile and portfolio_profile.full_name %} 
-{{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} {% endblock %} 
-{% block og_description %} 
-{% if portfolio_profile and portfolio_profile.headline %} 
-{{ portfolio_profile.headline }} 
-{% else %}Explore this professional portfolio with projects, experience, and skills. {% endif %} {% endblock %} 
-{% block twitter_title %} {% if portfolio_profile and portfolio_profile.full_name %} 
+{{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} 
+{% endblock %} 
+{% block og_description %} {% if portfolio_profile and portfolio_profile.headline %} 
+{{ portfolio_profile.headline }} {% else %}
+Explore this professional portfolio with projects, experience, and skills. {% endif %}
+{% endblock %} {% block twitter_title %} 
+{% if portfolio_profile and portfolio_profile.full_name %} 
 {{ portfolio_profile.full_name }} | Portfolio {% else %} Professional Portfolio {% endif %} 
 {% endblock %} 
 {% block twitter_description %} 
 {% if portfolio_profile and portfolio_profile.headline %}
 {{ portfolio_profile.headline }} {% else %} Explore this professional portfolio with projects, experience, and skills. {% endif %} {% endblock %} 
-
 {% block content %}
 <!-- Hero Section with Cover Image -->
 <section class="hero-section">
@@ -121,6 +112,22 @@ portfolio, web developer, projects, experience, skills, professional profile
           >
             <i class="fab fa-twitter"></i>
           </a>
+          {% endif %} {% if portfolio_profile.whatsapp %}
+          <a
+            href="{{ portfolio_profile.whatsapp }}"
+            target="_blank"
+            class="social-btn whatsapp"
+          >
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          {% endif %} {% if portfolio_profile.behance %}
+          <a
+            href="{{ portfolio_profile.behance }}"
+            target="_blank"
+            class="social-btn behance"
+          >
+            <i class="fab fa-behance"></i>
+          </a>
           {% endif %}
         </div>
       </div>
@@ -137,7 +144,8 @@ portfolio, web developer, projects, experience, skills, professional profile
     </h2>
 
     <div class="about-content">
-      {% if portfolio_profile.summary %} {{ portfolio_profile.summary|safe }} {% else %}
+      {% if portfolio_profile.summary %} {{ portfolio_profile.summary|safe }} {%
+      else %}
       <p>
         Your professional summary will appear here. Edit it in the admin panel
         to showcase your experience, skills, and achievements.
@@ -206,7 +214,7 @@ portfolio, web developer, projects, experience, skills, professional profile
           <div class="timeline-period">
             <i class="far fa-calendar"></i>
             {{ exp.start_date|date:"M Y" }} - {% if exp.currently_working %}
-            Present {% elif exp.end_date %} {{ exp.end_date|date:"M Y" }} {% else %} Present {% endif %}
+            Present {% elif exp.end_date %} {{ exp.end_date|date:"M Y" }} {%  else %} Present {% endif %}
           </div>
 
           {% if exp.description %}
@@ -270,7 +278,8 @@ portfolio, web developer, projects, experience, skills, professional profile
 
           <div class="timeline-period">
             <i class="far fa-calendar"></i>
-            {{ edu.start_date|date:"M Y" }} - {% if edu.end_date %} {{ edu.end_date|date:"M Y" }} {% else %} Present {% endif %}
+            {{ edu.start_date|date:"M Y" }} - {% if edu.end_date %} {{
+            edu.end_date|date:"M Y" }} {% else %} Present {% endif %}
           </div>
 
           {% if edu.description %}
@@ -448,8 +457,7 @@ portfolio, web developer, projects, experience, skills, professional profile
 {% endif %}
 
 <!-- Dynamic Sections -->
-{% if dynamic_sections %} 
-{% for section in dynamic_sections %}
+{% if dynamic_sections %} {% for section in dynamic_sections %}
 <section
   id="section-{{ section.id }}"
   class="section dynamic-section {{ section.layout_style }} {{ section.css_class }}"
@@ -558,11 +566,7 @@ portfolio, web developer, projects, experience, skills, professional profile
         {% for item in section.items.all %}
         <div class="award-item">
           <div class="award-date">
-            {% if item.date %} 
-            {{ item.date|date:"Y" }} 
-            {% elif item.date_text %} 
-            {{ item.date_text }} 
-            {% endif %}
+            {% if item.date %} {{ item.date|date:"Y" }} {% elif item.date_text %} {{ item.date_text }} {% endif %}
           </div>
 
           <div class="award-content">
