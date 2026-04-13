@@ -153,7 +153,12 @@ def database_config_from_url(database_url):
     return None
 
 
-database_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
+database_url = (
+    os.getenv('DATABASE_URL')
+    or os.getenv('POSTGRES_URL')
+    or os.getenv('DATABASE_POSTGRES_URL')
+    or os.getenv('DATABASE_POSTGRES_PRISMA_URL')
+)
 if database_url:
     url_database_config = database_config_from_url(database_url)
     if url_database_config:
