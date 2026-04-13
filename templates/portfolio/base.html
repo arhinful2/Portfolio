@@ -9,11 +9,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
-      {% block title %} 
-      {% if system_config and system_config.seo_default_meta_title %} 
-      {{ system_config.seo_default_meta_title }} 
-      {% elif portfolio_profile %} 
-      {{ portfolio_profile.full_name }} Portfolio {% else %} Professional Portfolio
+      {% block title %} {% if system_config and
+      system_config.seo_default_meta_title %} {{
+      system_config.seo_default_meta_title }} {% elif portfolio_profile %} {{
+      portfolio_profile.full_name }} Portfolio {% else %} Professional Portfolio
       {% endif %} {% endblock %}
     </title>
 
@@ -34,7 +33,8 @@
       name="robots"
       content="{{ system_config.seo_meta_robots|default:'index,follow' }}"
     />
-    {% block canonical_tag %} {% if system_config and system_config.seo_canonical_base_url %}
+    {% block canonical_tag %} {% if system_config and
+    system_config.seo_canonical_base_url %}
     <link
       rel="canonical"
       href="{{ system_config.seo_canonical_base_url }}{{ request.path }}"
@@ -119,8 +119,8 @@
     <style>
       :root {
           --primary-color: {{ portfolio_profile.theme_color|default:'#0073b1' }};
-          --primary-dark: {% widthratio portfolio_profile.theme_color|default:'#0073b1' 100 80 %};
-          --primary-light: {% widthratio portfolio_profile.theme_color|default:'#0073b1' 100 120 %};
+          --primary-dark: #005a8d;
+          --primary-light: #0099d4;
           --accent-color: {{ portfolio_profile.accent_color|default:'#333333' }};
           --text-color: #333333;
           --text-light: #666666;
@@ -160,13 +160,17 @@
           <a href="#about" class="nav-link">About</a>
           {% if portfolio_visibility and portfolio_visibility.show_experience %}
           <a href="#experience" class="nav-link">Experience</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
+          {% endif %} {% if portfolio_visibility and
+          portfolio_visibility.show_education %}
           <a href="#education" class="nav-link">Education</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
+          {% endif %} {% if portfolio_visibility and
+          portfolio_visibility.show_projects %}
           <a href="#projects" class="nav-link">Projects</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
+          {% endif %} {% if portfolio_visibility and
+          portfolio_visibility.show_skills %}
           <a href="#skills" class="nav-link">Skills</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
+          {% endif %} {% if portfolio_visibility and
+          portfolio_visibility.show_media %}
           <a href="{% url 'media_gallery' %}" class="nav-link">Media</a>
           {% endif %}
 
@@ -189,13 +193,17 @@
       <a href="#about" class="mobile-nav-link">About</a>
       {% if portfolio_visibility and portfolio_visibility.show_experience %}
       <a href="#experience" class="mobile-nav-link">Experience</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
+      {% endif %} {% if portfolio_visibility and
+      portfolio_visibility.show_education %}
       <a href="#education" class="mobile-nav-link">Education</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
+      {% endif %} {% if portfolio_visibility and
+      portfolio_visibility.show_projects %}
       <a href="#projects" class="mobile-nav-link">Projects</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
+      {% endif %} {% if portfolio_visibility and
+      portfolio_visibility.show_skills %}
       <a href="#skills" class="mobile-nav-link">Skills</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media
+      %}
       <a href="{% url 'media_gallery' %}" class="mobile-nav-link">Media</a>
       {% endif %}
       <a href="#contact" class="mobile-nav-link">Contact</a>
@@ -261,7 +269,8 @@
 
         <div class="footer-bottom">
           <p>
-            &copy; {% now "Y" %} {{ portfolio_profile.full_name|default:'Portfolio Owner' }}. All rights
+            &copy; {% now "Y" %} {{
+            portfolio_profile.full_name|default:'Portfolio Owner' }}. All rights
             reserved.
           </p>
           <p class="built-with">Built with Elechemobiophy</p>
