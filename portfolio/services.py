@@ -99,6 +99,10 @@ def test_database_connection_from_admin(config):
 
 
 def _database_runtime_config_path():
+    # Vercel runtime filesystem is mostly read-only except /tmp.
+    if os.getenv('VERCEL'):
+        return Path('/tmp') / 'database_runtime_config.json'
+
     runtime_dir = Path(settings.BASE_DIR) / '.runtime'
     runtime_dir.mkdir(parents=True, exist_ok=True)
     return runtime_dir / 'database_runtime_config.json'
@@ -124,10 +128,14 @@ def persist_active_database_runtime_config():
             }
 
     path = _database_runtime_config_path()
-    with path.open('w', encoding='utf-8') as handle:
-        json.dump(runtime_payload, handle, indent=2)
 
-    return path
+    try:
+        with path.open('w', encoding='utf-8') as handle:
+            json.dump(runtime_payload, handle, indent=2)
+        return path
+    except Exception:
+        # Never break admin save flow due to filesystem limitations.
+        return None
 
 
 def get_runtime_database_status():

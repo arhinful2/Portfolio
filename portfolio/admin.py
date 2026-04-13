@@ -538,11 +538,18 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
                 pk=obj.pk).update(is_active=False)
 
         runtime_config_path = persist_active_database_runtime_config()
-        self.message_user(
-            request,
-            f'Database runtime config updated at {runtime_config_path}. Restart the server to apply DB changes.',
-            level=messages.INFO,
-        )
+        if runtime_config_path:
+            self.message_user(
+                request,
+                f'Database runtime config updated at {runtime_config_path}. Restart the server to apply DB changes.',
+                level=messages.INFO,
+            )
+        else:
+            self.message_user(
+                request,
+                'Settings saved. Runtime DB file could not be persisted in this environment.',
+                level=messages.WARNING,
+            )
 
     def test_postgresql_connection(self, request, queryset):
         checked = 0
@@ -567,7 +574,7 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
         status = get_runtime_database_status()
         self.message_user(
             request,
-            f"Runtime DB status refreshed: {status.get('label', 'Unknown')} ({runtime_config_path})",
+            f"Runtime DB status refreshed: {status.get('label', 'Unknown')} ({runtime_config_path or 'runtime file unavailable'})",
             level=messages.SUCCESS,
         )
 
