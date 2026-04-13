@@ -1,12 +1,12 @@
-"""
-Custom Django storage backends for Vercel Blob and local development.
-Automatically switches between local filesystem (development) and Vercel Blob (production).
-"""
+"""Storage backends for local development and Vercel Blob production uploads."""
+
 import os
-import requests
+
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
-from urllib.parse import urljoin
+from django.core.exceptions import ImproperlyConfigured
+
+from vercel_blob import put, head, delete
+from vercel_blob.errors import BlobRequestError
 
 
 class VercelBlobStorage(FileSystemStorage):
@@ -21,84 +21,93 @@ class VercelBlobStorage(FileSystemStorage):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.blob_token = os.getenv('VERCEL_BLOB_READ_WRITE_TOKEN', '')
+        self.blob_token = os.getenv('VERCEL_BLOB_READ_WRITE_TOKEN') or os.getenv('BLOB_READ_WRITE_TOKEN')
         self.is_vercel = bool(os.getenv('VERCEL'))
-        self.blob_url = 'https://blob.vercelusercontent.com'
     
     def _prepare_blob_path(self, name):
-        """Prepare file path for Vercel Blob (remove leading slashes, ensure consistency)"""
+        """Normalize incoming pathnames for blob uploads."""
         return name.lstrip('/')
+
+    def _is_url(self, name):
+        return str(name).startswith('http://') or str(name).startswith('https://')
     
     def _save(self, name, content):
-        """Override to save to Vercel Blob on production, local filesystem otherwise"""
-        
-        # Always use local storage in development
-        if not self.is_vercel or not self.blob_token:
+        """Save to Blob on Vercel and to filesystem locally."""
+        if not self.is_vercel:
             return super()._save(name, content)
-        
-        # Read file content
-        if hasattr(content, 'read'):
-            file_content = content.read()
-        else:
-            file_content = content
-        
-        # Prepare blob path
-        blob_path = self._prepare_blob_path(name)
-        
-        try:
-            # Upload to Vercel Blob
-            response = requests.put(
-                f'{self.blob_url}/{blob_path}',
-                data=file_content,
-                headers={
-                    'Authorization': f'Bearer {self.blob_token}',
-                    'x-add-random-suffix': 'false',
-                },
-                timeout=30,
+
+        if not self.blob_token:
+            raise ImproperlyConfigured(
+                'Missing Vercel Blob token. Set VERCEL_BLOB_READ_WRITE_TOKEN (or BLOB_READ_WRITE_TOKEN).'
             )
-            response.raise_for_status()
-            return name
-        except Exception as e:
-            # Fallback to local storage if Blob upload fails
-            print(f"Vercel Blob upload failed for {name}: {e}. Falling back to local storage.")
-            return super()._save(name, content)
+
+        file_content = content.read() if hasattr(content, 'read') else content
+        blob_path = self._prepare_blob_path(name)
+
+        # Always allow overwrite to avoid duplicate-path failures during profile updates.
+        result = put(
+            blob_path,
+            file_content,
+            {
+                'token': self.blob_token,
+                'allowOverwrite': True,
+                'addRandomSuffix': True,
+            },
+            timeout=30,
+            multipart=len(file_content) > 5 * 1024 * 1024,
+        )
+
+        # Store public blob URL in DB so templates can resolve immediately.
+        return result.get('url', blob_path)
     
     def url(self, name):
-        """Return URL for accessing the file"""
-        if not self.is_vercel or not self.blob_token:
+        """Resolve URL for local path or already-uploaded blob URL."""
+        if self._is_url(name):
+            return name
+
+        if not self.is_vercel:
             return super().url(name)
-        
-        # Return Vercel Blob URL
-        blob_path = self._prepare_blob_path(name)
-        return f'{self.blob_url}/{blob_path}'
+
+        if not self.blob_token:
+            raise ImproperlyConfigured(
+                'Missing Vercel Blob token. Set VERCEL_BLOB_READ_WRITE_TOKEN (or BLOB_READ_WRITE_TOKEN).'
+            )
+
+        try:
+            metadata = head(name, {'token': self.blob_token}, timeout=10)
+            return metadata.get('url', name)
+        except Exception:
+            return name
     
     def delete(self, name):
-        """Delete from Vercel Blob or local filesystem"""
-        if not self.is_vercel or not self.blob_token:
+        """Delete file from Blob (Vercel) or filesystem (local)."""
+        if not self.is_vercel:
             return super().delete(name)
-        
-        blob_path = self._prepare_blob_path(name)
+
+        if not self.blob_token:
+            return
+
         try:
-            response = requests.delete(
-                f'{self.blob_url}/{blob_path}',
-                headers={'Authorization': f'Bearer {self.blob_token}'},
-                timeout=30,
-            )
-            response.raise_for_status()
-        except Exception as e:
-            print(f"Vercel Blob delete failed for {name}: {e}")
-            # Still try local delete as fallback
-            try:
-                return super().delete(name)
-            except:
-                pass
+            delete(name, {'token': self.blob_token}, timeout=10)
+        except Exception:
+            # Ignore delete failures to avoid breaking admin update/delete actions.
+            return
     
     def exists(self, name):
-        """Check if file exists in Vercel Blob or local filesystem"""
-        if not self.is_vercel or not self.blob_token:
+        """Check existence for name resolution and collision handling."""
+        if not self.is_vercel:
             return super().exists(name)
-        
-        # For Blob, we can check by trying to access it, but for performance
-        # we'll assume it exists if the path is valid. In production, Django
-        # typically only checks this for unsafe operations.
-        return True  # Assume exists since we just uploaded it
+
+        if not self.blob_token:
+            return False
+
+        if self._is_url(name):
+            return True
+
+        try:
+            head(name, {'token': self.blob_token}, timeout=5)
+            return True
+        except BlobRequestError:
+            return False
+        except Exception:
+            return False
