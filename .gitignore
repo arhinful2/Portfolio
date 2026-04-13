@@ -27,3 +27,9 @@
 /images/
 
 media/uploads/*.pdf
+
+# Local secrets
+credentials
+*.env
+.env
+.env.*
