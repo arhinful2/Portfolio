@@ -8,20 +8,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      {% block title %} 
-      {% if system_config and system_config.seo_default_meta_title %} 
-      {{ system_config.seo_default_meta_title }} 
-      {% elif portfolio_profile %} 
-      {{ portfolio_profile.full_name }} Portfolio {% else %} Professional Portfolio
-      {% endif %} 
-      {% endblock %}
-    </title>
+    <title>{% block title %}Professional Portfolio{% endblock %}</title>
 
     <!-- SEO Meta Tags -->
     <meta
       name="description"
-      content="{% block meta_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Professional portfolio website' }}{% endblock %}"
+      content="{% block meta_description %}Professional portfolio website{% endblock %}"
     />
     <meta
       name="keywords"
@@ -29,7 +21,7 @@
     />
     <meta
       name="author"
-      content="{{ system_config.seo_site_name|default:portfolio_profile.full_name|default:'Portfolio Owner' }}"
+      content="{{ system_config.seo_site_name|default:'Portfolio Owner' }}"
     />
     <meta
       name="robots"
@@ -46,20 +38,20 @@
     <meta property="og:type" content="website" />
     <meta
       property="og:title"
-      content="{% block og_title %}{{ system_config.seo_default_meta_title|default:portfolio_profile.full_name|default:'Professional Portfolio' }}{% endblock %}"
+      content="{% block og_title %}Professional Portfolio{% endblock %}"
     />
     <meta
       property="og:description"
-      content="{% block og_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Check out my professional portfolio' }}{% endblock %}"
+      content="{% block og_description %}Check out my professional portfolio{% endblock %}"
     />
     <meta
       property="og:site_name"
-      content="{{ system_config.seo_site_name|default:portfolio_profile.full_name|default:'Professional Portfolio' }}"
+      content="{{ system_config.seo_site_name|default:'Professional Portfolio' }}"
     />
     <meta property="og:url" content="{{ request.build_absolute_uri }}" />
     {% if system_config and system_config.seo_og_image_url %}
     <meta property="og:image" content="{{ system_config.seo_og_image_url }}" />
-    {% elif portfolio_profile.profile_image %}
+    {% elif portfolio_profile and portfolio_profile.profile_image %}
     <meta
       property="og:image"
       content="{{ portfolio_profile.profile_image.url }}"
@@ -73,15 +65,15 @@
     />
     <meta
       name="twitter:title"
-      content="{% block twitter_title %}{{ system_config.seo_default_meta_title|default:portfolio_profile.full_name|default:'Professional Portfolio' }}{% endblock %}"
+      content="{% block twitter_title %}Professional Portfolio{% endblock %}"
     />
     <meta
       name="twitter:description"
-      content="{% block twitter_description %}{{ system_config.seo_default_meta_description|default:portfolio_profile.headline|default:'Check out my professional portfolio' }}{% endblock %}"
+      content="{% block twitter_description %}Check out my professional portfolio{% endblock %}"
     />
     {% if system_config and system_config.seo_og_image_url %}
     <meta name="twitter:image" content="{{ system_config.seo_og_image_url }}" />
-    {% elif portfolio_profile.profile_image %}
+    {% elif portfolio_profile and portfolio_profile.profile_image %}
     <meta
       name="twitter:image"
       content="{{ portfolio_profile.profile_image.url }}"
@@ -120,8 +112,8 @@
     <style>
       :root {
           --primary-color: {{ portfolio_profile.theme_color|default:'#0073b1' }};
-          --primary-dark: #005a8d;
-          --primary-light: #0099d4;
+          --primary-dark: color-mix(in srgb, var(--primary-color) 80%, black);
+          --primary-light: color-mix(in srgb, var(--primary-color) 80%, white);
           --accent-color: {{ portfolio_profile.accent_color|default:'#333333' }};
           --text-color: #333333;
           --text-light: #666666;
@@ -165,8 +157,7 @@
           <a href="#education" class="nav-link">Education</a>
           {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
           <a href="#projects" class="nav-link">Projects</a>
-          {% endif %} 
-          {% if portfolio_visibility and portfolio_visibility.show_skills %}
+          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
           <a href="#skills" class="nav-link">Skills</a>
           {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
           <a href="{% url 'media_gallery' %}" class="nav-link">Media</a>
@@ -197,8 +188,7 @@
       <a href="#projects" class="mobile-nav-link">Projects</a>
       {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
       <a href="#skills" class="mobile-nav-link">Skills</a>
-      {% endif %} 
-      {% if portfolio_visibility and portfolio_visibility.show_media %}
+      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
       <a href="{% url 'media_gallery' %}" class="mobile-nav-link">Media</a>
       {% endif %}
       <a href="#contact" class="mobile-nav-link">Contact</a>
