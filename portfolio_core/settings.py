@@ -238,13 +238,14 @@ STORAGES = {
         'BACKEND': default_file_storage_backend,
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 
 # Compatibility aliases for older integrations
 DEFAULT_FILE_STORAGE = STORAGES['default']['BACKEND']
 STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
+WHITENOISE_MANIFEST_STRICT = False
 
 # TinyMCE Configuration
 TINYMCE_DEFAULT_CONFIG = {
@@ -278,8 +279,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Create required directories
 os.makedirs(MEDIA_ROOT, exist_ok=True)
-os.makedirs(STATIC_ROOT, exist_ok=True)
-os.makedirs(os.path.join(BASE_DIR, 'templates/portfolio'), exist_ok=True)
+if not os.getenv('VERCEL'):
+    os.makedirs(STATIC_ROOT, exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, 'templates/portfolio'), exist_ok=True)
 
 # Add at the BOTTOM of settings.py:
 
