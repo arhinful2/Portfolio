@@ -495,6 +495,14 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
             ),
             'description': 'Configure Gmail/SMTP credentials here (App Password supported).',
         }),
+        ('Contact Auto-Reply', {
+            'fields': (
+                'auto_reply_enabled',
+                'auto_reply_subject',
+                'auto_reply_message',
+            ),
+            'description': 'Control and customize the confirmation email sent after a visitor submits the contact form.',
+        }),
         ('PostgreSQL Database Setup', {
             'fields': (
                 'database_engine',

@@ -76,22 +76,43 @@ def send_contact_auto_reply(contact_message):
         if config.default_from_email:
             support_email = config.default_from_email
 
-    subject = f"Thanks for contacting {site_name}"
-    body = (
-        f"Hello {contact_message.name},\n\n"
-        "Thank you for contacting me through my portfolio website. "
-        "I have received your message and will get back to you as soon as possible.\n\n"
-        "Your message details:\n"
-        f"Subject: {contact_message.subject}\n"
-        f"Message: {contact_message.message}\n\n"
-        "Best regards,\n"
-        f"{site_name}\n"
-        f"{support_email}"
+    if config and not config.auto_reply_enabled:
+        return False
+
+    placeholders = {
+        '{name}': contact_message.name or 'there',
+        '{email}': contact_message.email or '',
+        '{subject}': contact_message.subject or '',
+        '{message}': contact_message.message or '',
+        '{site_name}': site_name,
+        '{support_email}': support_email,
+    }
+
+    default_subject = 'Thanks for contacting {site_name}'
+    default_message = (
+        'Hello {name},\n\n'
+        'Thank you for contacting me through my portfolio website. '
+        'I have received your message and will get back to you as soon as possible.\n\n'
+        'Your message summary:\n'
+        'Subject: {subject}\n'
+        'Message: {message}\n\n'
+        'Best regards,\n'
+        '{site_name}\n'
+        '{support_email}'
     )
 
+    subject_template = (
+        config.auto_reply_subject if config and config.auto_reply_subject else default_subject)
+    body_template = (
+        config.auto_reply_message if config and config.auto_reply_message else default_message)
+
+    for key, value in placeholders.items():
+        subject_template = subject_template.replace(key, value)
+        body_template = body_template.replace(key, value)
+
     send_email_with_admin_config(
-        subject,
-        body,
+        subject_template,
+        body_template,
         [contact_message.email],
         fail_silently=True,
     )

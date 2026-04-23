@@ -675,6 +675,7 @@ Explore this professional portfolio with projects, experience, and skills. {% en
 
       <div class="contact-form">
         <h3>Send Message</h3>
+        <div id="contactFormStatus" class="contact-form-status" role="status" aria-live="polite"></div>
         <form id="contactForm" method="post">
           {% csrf_token %}
           <div class="form-group">
@@ -715,6 +716,13 @@ Explore this professional portfolio with projects, experience, and skills. {% en
 <script>
   document.addEventListener('DOMContentLoaded', function() {
       const contactForm = document.getElementById('contactForm');
+      const formStatus = document.getElementById('contactFormStatus');
+
+      function showFormStatus(type, message) {
+        if (!formStatus) return;
+        formStatus.className = 'contact-form-status show ' + type;
+        formStatus.textContent = message;
+      }
 
       if (contactForm) {
           contactForm.addEventListener('submit', function(e) {
@@ -751,17 +759,19 @@ Explore this professional portfolio with projects, experience, and skills. {% en
               })
               .then(data => {
                   if (data && data.success) {
-                      // Show success message
-                      alert('✓ Message sent successfully! I\'ll get back to you soon.');
+                    showFormStatus(
+                      'success',
+                      'Message sent successfully. Thank you for reaching out. A confirmation email has been sent to your inbox, and you will receive a personal response soon.'
+                    );
                       // Reset form
                       contactForm.reset();
                   } else if (data && data.message) {
-                      alert('⚠️ ' + data.message);
+                    showFormStatus('error', data.message);
                   }
               })
               .catch(error => {
                   console.error('Error:', error);
-                  alert('❌ An error occurred. Please try again or email me directly.');
+                  showFormStatus('error', 'We could not send your message at the moment. Please try again in a few minutes or contact us directly by email.');
               })
               .finally(() => {
                   // Reset button state
@@ -774,7 +784,7 @@ Explore this professional portfolio with projects, experience, and skills. {% en
       // Also handle messages from Django message framework
       {% if messages %}
       {% for message in messages %}
-      alert("{{ message }}");
+      showFormStatus('success', "{{ message|escapejs }}");
       {% endfor %}
       {% endif %}
   });

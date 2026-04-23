@@ -58,8 +58,10 @@ class Profile(models.Model):
         blank=True, null=True, verbose_name="LinkedIn URL")
     github = models.URLField(blank=True, null=True, verbose_name="GitHub URL")
     twitter = models.URLField(blank=True, null=True)
-    whatsapp = models.URLField(blank=True, null=True, verbose_name="WhatsApp URL")
-    behance = models.URLField(blank=True, null=True, verbose_name="Behance URL")
+    whatsapp = models.URLField(
+        blank=True, null=True, verbose_name="WhatsApp URL")
+    behance = models.URLField(blank=True, null=True,
+                              verbose_name="Behance URL")
     instagram = models.URLField(blank=True, null=True)
     facebook = models.URLField(blank=True, null=True)
 
@@ -581,6 +583,27 @@ class SystemConfiguration(models.Model):
         max_length=255, blank=True, null=True)
     email_use_tls = models.BooleanField(default=True)
     email_use_ssl = models.BooleanField(default=False)
+
+    auto_reply_enabled = models.BooleanField(
+        default=True,
+        help_text="Automatically send a confirmation email to people who submit the contact form.")
+    auto_reply_subject = models.CharField(
+        max_length=255,
+        default='Thanks for contacting {site_name}',
+        help_text="Placeholders supported: {name}, {subject}, {site_name}")
+    auto_reply_message = models.TextField(
+        default=(
+            'Hello {name},\n\n'
+            'Thank you for contacting me through my portfolio website. '
+            'I have received your message and will get back to you as soon as possible.\n\n'
+            'Your message summary:\n'
+            'Subject: {subject}\n'
+            'Message: {message}\n\n'
+            'Best regards,\n'
+            '{site_name}\n'
+            '{support_email}'
+        ),
+        help_text="Placeholders supported: {name}, {email}, {subject}, {message}, {site_name}, {support_email}")
 
     database_engine = models.CharField(
         max_length=20, choices=DATABASE_ENGINE_CHOICES, default='sqlite')

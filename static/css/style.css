@@ -773,6 +773,32 @@ body {
     min-height: 150px;
 }
 
+.contact-form-status {
+    display: none;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.contact-form-status.show {
+    display: block;
+}
+
+.contact-form-status.success {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #065f46;
+}
+
+.contact-form-status.error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #991b1b;
+}
+
 /* ===== FOOTER ===== */
 .footer {
     background: var(--bg-light);
