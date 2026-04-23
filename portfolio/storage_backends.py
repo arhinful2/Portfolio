@@ -3,6 +3,7 @@
 import os
 import posixpath
 import uuid
+from urllib.parse import urlparse
 
 from django.core.files.storage import FileSystemStorage
 
@@ -50,6 +51,18 @@ class VercelBlobStorage(FileSystemStorage):
     def _is_url(self, name):
         return str(name).startswith('http://') or str(name).startswith('https://')
 
+    def _extract_pathname(self, name):
+        """Return a normalized blob pathname for URL or plain path input."""
+        value = str(name or '').strip()
+        if not value:
+            return ''
+
+        if self._is_url(value):
+            parsed = urlparse(value)
+            return parsed.path.lstrip('/')
+
+        return value.lstrip('/')
+
     def _save(self, name, content):
         """Save to Blob on Vercel and to filesystem locally."""
         if not self.is_vercel:
@@ -76,26 +89,31 @@ class VercelBlobStorage(FileSystemStorage):
                 multipart=len(file_content) > 5 * 1024 * 1024,
             )
 
-            # Always prefer storing full URL so url() doesn't need extra lookups.
-            # This makes image rendering faster and more reliable on Vercel.
-            blob_url = result.get('url')
-            if blob_url:
-                # Blob URL is typically ~90-120 chars; Django FileField can hold 255+
-                if len(blob_url) <= 200:
-                    return blob_url
-                # If URL is unexpectedly long, fall back to storing pathname
-                return result.get('pathname', blob_path)
-
-            # Fallback if put() didn't return a URL (shouldn't happen)
-            return result.get('pathname', blob_path)
+            # Persist only pathname to avoid FileField max_length truncation issues.
+            # URL is resolved dynamically in url().
+            saved_pathname = self._extract_pathname(result.get('pathname', blob_path))
+            return saved_pathname or blob_path
         except Exception:
             # Keep admin save resilient even if blob request fails.
             return super()._save(blob_path, content)
 
     def url(self, name):
         """Resolve URL for local path or already-uploaded blob URL."""
+        if not name:
+            return ''
+
+        pathname = self._extract_pathname(name)
+
         if self._is_url(name):
-            return name
+            # For legacy URL values, re-resolve canonical URL from pathname if possible.
+            if not self.is_vercel or not self.blob_token:
+                return name
+
+            try:
+                metadata = head(pathname, {'token': self.blob_token}, timeout=10)
+                return metadata.get('url', name)
+            except Exception:
+                return name
 
         if not self.is_vercel:
             return super().url(name)
@@ -104,22 +122,11 @@ class VercelBlobStorage(FileSystemStorage):
             return super().url(name)
 
         try:
-            metadata = head(name, {'token': self.blob_token}, timeout=10)
-            if 'url' in metadata:
-                return metadata['url']
-            # If metadata exists but no url key, construct from pathname
-            pathname = metadata.get('pathname', name)
-            return self._construct_blob_url(pathname)
+            metadata = head(pathname, {'token': self.blob_token}, timeout=10)
+            return metadata.get('url', name)
         except Exception:
-            # If head() fails, construct URL as fallback
-            # This ensures Vercel-hosted images always return a valid Blob URL
-            return self._construct_blob_url(name)
-
-    def _construct_blob_url(self, pathname):
-        """Construct valid Vercel Blob URL from pathname."""
-        # Public Vercel Blob store domain (works for all public blobs)
-        pathname = pathname.lstrip('/')
-        return f'https://blob.vercelusercontent.com/{pathname}'
+            # Keep graceful fallback for templates even if metadata lookup fails.
+            return name
 
     def delete(self, name):
         """Delete file from Blob (Vercel) or filesystem (local)."""
@@ -130,7 +137,9 @@ class VercelBlobStorage(FileSystemStorage):
             return
 
         try:
-            delete(name, {'token': self.blob_token}, timeout=10)
+            pathname = self._extract_pathname(name)
+            if pathname:
+                delete(pathname, {'token': self.blob_token}, timeout=10)
         except Exception:
             # Ignore delete failures to avoid breaking admin update/delete actions.
             return
@@ -144,7 +153,7 @@ class VercelBlobStorage(FileSystemStorage):
             return False
 
         if self._is_url(name):
-            return True
+            name = self._extract_pathname(name)
 
         try:
             head(name, {'token': self.blob_token}, timeout=5)
