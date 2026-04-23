@@ -91,7 +91,8 @@ class VercelBlobStorage(FileSystemStorage):
 
             # Persist only pathname to avoid FileField max_length truncation issues.
             # URL is resolved dynamically in url().
-            saved_pathname = self._extract_pathname(result.get('pathname', blob_path))
+            saved_pathname = self._extract_pathname(
+                result.get('pathname', blob_path))
             return saved_pathname or blob_path
         except Exception:
             # Keep admin save resilient even if blob request fails.
@@ -110,7 +111,8 @@ class VercelBlobStorage(FileSystemStorage):
                 return name
 
             try:
-                metadata = head(pathname, {'token': self.blob_token}, timeout=10)
+                metadata = head(
+                    pathname, {'token': self.blob_token}, timeout=10)
                 return metadata.get('url', name)
             except Exception:
                 return name
