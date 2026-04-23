@@ -218,7 +218,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'
@@ -229,9 +228,23 @@ else:
 
 # File storage backend (Vercel Blob for production, local filesystem for development)
 if os.getenv('VERCEL'):
-    DEFAULT_FILE_STORAGE = 'portfolio.storage_backends.VercelBlobStorage'
+    default_file_storage_backend = 'portfolio.storage_backends.VercelBlobStorage'
 else:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    default_file_storage_backend = 'django.core.files.storage.FileSystemStorage'
+
+# Django 5/6 storage configuration
+STORAGES = {
+    'default': {
+        'BACKEND': default_file_storage_backend,
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# Compatibility aliases for older integrations
+DEFAULT_FILE_STORAGE = STORAGES['default']['BACKEND']
+STATICFILES_STORAGE = STORAGES['staticfiles']['BACKEND']
 
 # TinyMCE Configuration
 TINYMCE_DEFAULT_CONFIG = {

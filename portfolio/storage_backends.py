@@ -3,12 +3,25 @@
 import os
 import posixpath
 import uuid
+import logging
 from urllib.parse import urlparse
 
 from django.core.files.storage import FileSystemStorage
 
-from vercel_blob import put, head, delete
-from vercel_blob.errors import BlobRequestError
+try:
+    from vercel_blob import put, head, delete
+    from vercel_blob.errors import BlobRequestError
+    HAS_VERCEL_BLOB = True
+except Exception:
+    put = head = delete = None
+
+    class BlobRequestError(Exception):
+        pass
+
+    HAS_VERCEL_BLOB = False
+
+
+logger = logging.getLogger(__name__)
 
 
 class VercelBlobStorage(FileSystemStorage):
@@ -26,6 +39,10 @@ class VercelBlobStorage(FileSystemStorage):
         self.blob_token = os.getenv(
             'VERCEL_BLOB_READ_WRITE_TOKEN') or os.getenv('BLOB_READ_WRITE_TOKEN')
         self.is_vercel = bool(os.getenv('VERCEL'))
+        if self.is_vercel and not HAS_VERCEL_BLOB:
+            logger.warning(
+                'vercel_blob package not available at runtime; Blob uploads are disabled.'
+            )
 
     def _prepare_blob_path(self, name):
         """Normalize and shorten incoming pathnames for blob uploads."""
@@ -73,6 +90,12 @@ class VercelBlobStorage(FileSystemStorage):
 
         if not self.blob_token:
             # Safety fallback: if token is missing in production, avoid hard 500.
+            logger.warning(
+                'VERCEL_BLOB_READ_WRITE_TOKEN missing on Vercel runtime; falling back to filesystem storage.'
+            )
+            return super()._save(blob_path, content)
+
+        if not HAS_VERCEL_BLOB:
             return super()._save(blob_path, content)
 
         try:
@@ -82,6 +105,7 @@ class VercelBlobStorage(FileSystemStorage):
                 file_content,
                 {
                     'token': self.blob_token,
+                    'access': 'public',
                     'allowOverwrite': True,
                     'addRandomSuffix': False,
                 },
@@ -94,8 +118,9 @@ class VercelBlobStorage(FileSystemStorage):
             saved_pathname = self._extract_pathname(
                 result.get('pathname', blob_path))
             return saved_pathname or blob_path
-        except Exception:
+        except Exception as exc:
             # Keep admin save resilient even if blob request fails.
+            logger.exception('Blob upload failed for path %s: %s', blob_path, exc)
             return super()._save(blob_path, content)
 
     def url(self, name):
@@ -123,6 +148,9 @@ class VercelBlobStorage(FileSystemStorage):
         if not self.blob_token:
             return super().url(name)
 
+        if not HAS_VERCEL_BLOB:
+            return super().url(name)
+
         try:
             metadata = head(pathname, {'token': self.blob_token}, timeout=10)
             return metadata.get('url', name)
@@ -136,6 +164,9 @@ class VercelBlobStorage(FileSystemStorage):
             return super().delete(name)
 
         if not self.blob_token:
+            return
+
+        if not HAS_VERCEL_BLOB:
             return
 
         try:
@@ -152,6 +183,9 @@ class VercelBlobStorage(FileSystemStorage):
             return super().exists(name)
 
         if not self.blob_token:
+            return False
+
+        if not HAS_VERCEL_BLOB:
             return False
 
         if self._is_url(name):
