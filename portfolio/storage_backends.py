@@ -31,13 +31,19 @@ class VercelBlobStorage(FileSystemStorage):
         normalized = name.replace('\\', '/').lstrip('/')
         folder, filename = posixpath.split(normalized)
 
-        # Keep DB-stored file names within Django FileField default length limits.
-        # Example output: user_1/profile/3f9a6f3f8a4f4c88a8cb4bc6baf6c53c.jpg
-        if len(normalized) > 95:
-            _, ext = os.path.splitext(filename)
-            filename = f"{uuid.uuid4().hex}{ext.lower()}"
+        # Keep path short and URL-safe so FileField max_length (100) is not exceeded
+        # when saving full blob URLs.
+        _, ext = os.path.splitext(filename)
+        needs_short_name = (
+            len(normalized) > 40
+            or ' ' in filename
+            or any(ch in filename for ch in ['(', ')', '[', ']', '#', '?', '&'])
+        )
+
+        if needs_short_name:
+            short_name = f"{uuid.uuid4().hex[:18]}{ext.lower()}"
             normalized = posixpath.join(
-                folder, filename) if folder else filename
+                folder, short_name) if folder else short_name
 
         return normalized
 
@@ -70,7 +76,11 @@ class VercelBlobStorage(FileSystemStorage):
                 multipart=len(file_content) > 5 * 1024 * 1024,
             )
 
-            # Store blob pathname in DB (not full URL) so FileField length is safe.
+            # Prefer storing full URL so rendering does not depend on extra lookups.
+            blob_url = result.get('url')
+            if blob_url and len(blob_url) <= 100:
+                return blob_url
+
             return result.get('pathname', blob_path)
         except Exception:
             # Keep admin save resilient even if blob request fails.
@@ -91,7 +101,7 @@ class VercelBlobStorage(FileSystemStorage):
             metadata = head(name, {'token': self.blob_token}, timeout=10)
             return metadata.get('url', name)
         except Exception:
-            return name
+            return super().url(name)
 
     def delete(self, name):
         """Delete file from Blob (Vercel) or filesystem (local)."""
