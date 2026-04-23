@@ -15,16 +15,17 @@ class VercelBlobStorage(FileSystemStorage):
     Hybrid storage backend:
     - On Vercel: uploads to Vercel Blob via REST API
     - Locally: stores to filesystem (default Django behavior)
-    
+
     Environment variables required on Vercel:
     - VERCEL_BLOB_READ_WRITE_TOKEN: Get from Vercel dashboard > Storage > Blob > Tokens
     """
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.blob_token = os.getenv('VERCEL_BLOB_READ_WRITE_TOKEN') or os.getenv('BLOB_READ_WRITE_TOKEN')
+        self.blob_token = os.getenv(
+            'VERCEL_BLOB_READ_WRITE_TOKEN') or os.getenv('BLOB_READ_WRITE_TOKEN')
         self.is_vercel = bool(os.getenv('VERCEL'))
-    
+
     def _prepare_blob_path(self, name):
         """Normalize and shorten incoming pathnames for blob uploads."""
         normalized = name.replace('\\', '/').lstrip('/')
@@ -35,13 +36,14 @@ class VercelBlobStorage(FileSystemStorage):
         if len(normalized) > 95:
             _, ext = os.path.splitext(filename)
             filename = f"{uuid.uuid4().hex}{ext.lower()}"
-            normalized = posixpath.join(folder, filename) if folder else filename
+            normalized = posixpath.join(
+                folder, filename) if folder else filename
 
         return normalized
 
     def _is_url(self, name):
         return str(name).startswith('http://') or str(name).startswith('https://')
-    
+
     def _save(self, name, content):
         """Save to Blob on Vercel and to filesystem locally."""
         if not self.is_vercel:
@@ -73,7 +75,7 @@ class VercelBlobStorage(FileSystemStorage):
         except Exception:
             # Keep admin save resilient even if blob request fails.
             return super()._save(blob_path, content)
-    
+
     def url(self, name):
         """Resolve URL for local path or already-uploaded blob URL."""
         if self._is_url(name):
@@ -90,7 +92,7 @@ class VercelBlobStorage(FileSystemStorage):
             return metadata.get('url', name)
         except Exception:
             return name
-    
+
     def delete(self, name):
         """Delete file from Blob (Vercel) or filesystem (local)."""
         if not self.is_vercel:
@@ -104,7 +106,7 @@ class VercelBlobStorage(FileSystemStorage):
         except Exception:
             # Ignore delete failures to avoid breaking admin update/delete actions.
             return
-    
+
     def exists(self, name):
         """Check existence for name resolution and collision handling."""
         if not self.is_vercel:
