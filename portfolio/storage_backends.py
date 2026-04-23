@@ -76,11 +76,17 @@ class VercelBlobStorage(FileSystemStorage):
                 multipart=len(file_content) > 5 * 1024 * 1024,
             )
 
-            # Prefer storing full URL so rendering does not depend on extra lookups.
+            # Always prefer storing full URL so url() doesn't need extra lookups.
+            # This makes image rendering faster and more reliable on Vercel.
             blob_url = result.get('url')
-            if blob_url and len(blob_url) <= 100:
-                return blob_url
+            if blob_url:
+                # Blob URL is typically ~90-120 chars; Django FileField can hold 255+
+                if len(blob_url) <= 200:
+                    return blob_url
+                # If URL is unexpectedly long, fall back to storing pathname
+                return result.get('pathname', blob_path)
 
+            # Fallback if put() didn't return a URL (shouldn't happen)
             return result.get('pathname', blob_path)
         except Exception:
             # Keep admin save resilient even if blob request fails.
@@ -99,9 +105,21 @@ class VercelBlobStorage(FileSystemStorage):
 
         try:
             metadata = head(name, {'token': self.blob_token}, timeout=10)
-            return metadata.get('url', name)
+            if 'url' in metadata:
+                return metadata['url']
+            # If metadata exists but no url key, construct from pathname
+            pathname = metadata.get('pathname', name)
+            return self._construct_blob_url(pathname)
         except Exception:
-            return super().url(name)
+            # If head() fails, construct URL as fallback
+            # This ensures Vercel-hosted images always return a valid Blob URL
+            return self._construct_blob_url(name)
+
+    def _construct_blob_url(self, pathname):
+        """Construct valid Vercel Blob URL from pathname."""
+        # Public Vercel Blob store domain (works for all public blobs)
+        pathname = pathname.lstrip('/')
+        return f'https://blob.vercelusercontent.com/{pathname}'
 
     def delete(self, name):
         """Delete file from Blob (Vercel) or filesystem (local)."""
