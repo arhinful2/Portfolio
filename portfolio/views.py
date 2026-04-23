@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from .models import Profile, MediaFile, Project, DynamicSection, ContactMessage
-from .services import notify_admin_for_contact_message, send_email_with_admin_config
+from .services import notify_admin_for_contact_message, send_email_with_admin_config, send_contact_auto_reply
 
 
 # Update the get_portfolio_data function (add this parameter)
@@ -89,6 +89,11 @@ class PortfolioHomeView(TemplateView):
             except Exception as exc:
                 print(f"Admin notification email failed: {exc}")
 
+            try:
+                send_contact_auto_reply(contact_message)
+            except Exception as exc:
+                print(f"Contact auto-reply email failed: {exc}")
+
             # Print to terminal (for testing)
             print("\n" + "="*50)
             print("NEW CONTACT MESSAGE RECEIVED:")
@@ -142,6 +147,11 @@ class PortfolioHomeView(TemplateView):
                 notify_admin_for_contact_message(contact_message)
             except Exception as exc:
                 print(f"Admin notification email failed: {exc}")
+
+            try:
+                send_contact_auto_reply(contact_message)
+            except Exception as exc:
+                print(f"Contact auto-reply email failed: {exc}")
 
             # Print to terminal
             print("\n" + "="*50)
@@ -248,6 +258,11 @@ def contact_ajax_view(request):
                 notify_admin_for_contact_message(contact_message)
             except Exception as exc:
                 print(f"Admin notification email failed: {exc}")
+
+            try:
+                send_contact_auto_reply(contact_message)
+            except Exception as exc:
+                print(f"Contact auto-reply email failed: {exc}")
 
             # Print to terminal
             print("\n" + "="*50)

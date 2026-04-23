@@ -64,6 +64,40 @@ def notify_admin_for_contact_message(contact_message):
     return True
 
 
+def send_contact_auto_reply(contact_message):
+    """Send a default acknowledgement email to the sender."""
+    config = get_system_configuration()
+    site_name = 'My Portfolio'
+    support_email = settings.DEFAULT_FROM_EMAIL
+
+    if config:
+        if config.seo_site_name:
+            site_name = config.seo_site_name
+        if config.default_from_email:
+            support_email = config.default_from_email
+
+    subject = f"Thanks for contacting {site_name}"
+    body = (
+        f"Hello {contact_message.name},\n\n"
+        "Thank you for contacting me through my portfolio website. "
+        "I have received your message and will get back to you as soon as possible.\n\n"
+        "Your message details:\n"
+        f"Subject: {contact_message.subject}\n"
+        f"Message: {contact_message.message}\n\n"
+        "Best regards,\n"
+        f"{site_name}\n"
+        f"{support_email}"
+    )
+
+    send_email_with_admin_config(
+        subject,
+        body,
+        [contact_message.email],
+        fail_silently=True,
+    )
+    return True
+
+
 def build_database_config_from_admin(config):
     if not config or config.database_engine != 'postgresql':
         return None
