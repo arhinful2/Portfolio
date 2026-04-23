@@ -38,7 +38,11 @@ class VercelBlobStorage(FileSystemStorage):
         super().__init__(*args, **kwargs)
         self.blob_token = os.getenv(
             'VERCEL_BLOB_READ_WRITE_TOKEN') or os.getenv('BLOB_READ_WRITE_TOKEN')
-        self.is_vercel = bool(os.getenv('VERCEL'))
+        self.is_vercel = bool(
+            os.getenv('VERCEL')
+            or os.getenv('VERCEL_ENV')
+            or os.getenv('NOW_REGION')
+        )
         if self.is_vercel and not HAS_VERCEL_BLOB:
             logger.warning(
                 'vercel_blob package not available at runtime; Blob uploads are disabled.'
@@ -89,14 +93,18 @@ class VercelBlobStorage(FileSystemStorage):
         blob_path = self._prepare_blob_path(name)
 
         if not self.blob_token:
-            # Safety fallback: if token is missing in production, avoid hard 500.
-            logger.warning(
-                'VERCEL_BLOB_READ_WRITE_TOKEN missing on Vercel runtime; falling back to filesystem storage.'
+            # On Vercel this must be configured; fail fast instead of fake-success local save.
+            logger.error(
+                'VERCEL_BLOB_READ_WRITE_TOKEN missing on Vercel runtime; upload cannot proceed.'
             )
-            return super()._save(blob_path, content)
+            raise RuntimeError(
+                'Missing VERCEL_BLOB_READ_WRITE_TOKEN in Vercel environment variables.'
+            )
 
         if not HAS_VERCEL_BLOB:
-            return super()._save(blob_path, content)
+            raise RuntimeError(
+                'vercel_blob package not available at runtime. Ensure vercel-blob is installed.'
+            )
 
         try:
             # Use deterministic short path to avoid DB length overflow issues.
@@ -119,10 +127,10 @@ class VercelBlobStorage(FileSystemStorage):
                 result.get('pathname', blob_path))
             return saved_pathname or blob_path
         except Exception as exc:
-            # Keep admin save resilient even if blob request fails.
+            # Fail fast on Vercel so failed uploads are visible and can be fixed.
             logger.exception(
                 'Blob upload failed for path %s: %s', blob_path, exc)
-            return super()._save(blob_path, content)
+            raise
 
     def url(self, name):
         """Resolve URL for local path or already-uploaded blob URL."""

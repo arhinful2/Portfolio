@@ -36,7 +36,13 @@ def env_bool(name, default=False):
     return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
-DEBUG = env_bool('DJANGO_DEBUG', not bool(os.getenv('VERCEL')))
+IS_VERCEL = bool(
+    os.getenv('VERCEL')
+    or os.getenv('VERCEL_ENV')
+    or os.getenv('NOW_REGION')
+)
+
+DEBUG = env_bool('DJANGO_DEBUG', not IS_VERCEL)
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -50,7 +56,7 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-if os.getenv('VERCEL') and not CSRF_TRUSTED_ORIGINS:
+if IS_VERCEL and not CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
 
@@ -227,7 +233,7 @@ else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # File storage backend (Vercel Blob for production, local filesystem for development)
-if os.getenv('VERCEL'):
+if IS_VERCEL:
     default_file_storage_backend = 'portfolio.storage_backends.VercelBlobStorage'
 else:
     default_file_storage_backend = 'django.core.files.storage.FileSystemStorage'
@@ -279,7 +285,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Create required directories
 os.makedirs(MEDIA_ROOT, exist_ok=True)
-if not os.getenv('VERCEL'):
+if not IS_VERCEL:
     os.makedirs(STATIC_ROOT, exist_ok=True)
     os.makedirs(os.path.join(BASE_DIR, 'templates/portfolio'), exist_ok=True)
 
