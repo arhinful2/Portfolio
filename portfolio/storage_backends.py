@@ -120,7 +120,8 @@ class VercelBlobStorage(FileSystemStorage):
             return saved_pathname or blob_path
         except Exception as exc:
             # Keep admin save resilient even if blob request fails.
-            logger.exception('Blob upload failed for path %s: %s', blob_path, exc)
+            logger.exception(
+                'Blob upload failed for path %s: %s', blob_path, exc)
             return super()._save(blob_path, content)
 
     def url(self, name):
