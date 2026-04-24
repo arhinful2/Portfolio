@@ -5,6 +5,7 @@
 *.gif
 *.bmp
 *.svg
+!static/images/favicon.svg
 
 # Ignore videos
 *.mp4
