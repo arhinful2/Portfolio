@@ -186,6 +186,9 @@ class ProfileAdmin(admin.ModelAdmin):
         return obj.full_name
     full_name.short_description = 'Full Name'  # type: ignore
 
+    class Media:
+        js = ('admin/js/media_upload_guard.js',)
+
 
 @admin.register(MediaFile)
 class MediaFileAdmin(admin.ModelAdmin):
@@ -221,6 +224,9 @@ class MediaFileAdmin(admin.ModelAdmin):
                 return mark_safe('<span style="font-size: 24px; color: green;">🎵</span>')
         return "-"
     file_preview.short_description = 'Preview'  # type: ignore
+
+    class Media:
+        js = ('admin/js/media_upload_guard.js',)
 
     def file_preview_display(self, obj):
         """Preview for detail/edit view"""
@@ -339,6 +345,9 @@ class ProjectAdmin(admin.ModelAdmin):
             deleted_obj.delete()
 
         formset.save_m2m()
+
+    class Media:
+        js = ('admin/js/media_upload_guard.js',)
 
 
 # Re-register UserAdmin
