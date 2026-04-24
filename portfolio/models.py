@@ -391,6 +391,36 @@ class SectionVisibility(models.Model):
     show_contact = models.BooleanField(
         default=True, verbose_name="Contact Section")
 
+    # Navbar ordering controls (smaller number appears first)
+    nav_about_order = models.PositiveIntegerField(
+        default=10,
+        help_text="Navbar position for About link"
+    )
+    nav_experience_order = models.PositiveIntegerField(
+        default=20,
+        help_text="Navbar position for Experience link"
+    )
+    nav_education_order = models.PositiveIntegerField(
+        default=30,
+        help_text="Navbar position for Education link"
+    )
+    nav_projects_order = models.PositiveIntegerField(
+        default=40,
+        help_text="Navbar position for Projects link"
+    )
+    nav_skills_order = models.PositiveIntegerField(
+        default=50,
+        help_text="Navbar position for Skills link"
+    )
+    nav_media_order = models.PositiveIntegerField(
+        default=60,
+        help_text="Navbar position for Media link"
+    )
+    nav_contact_order = models.PositiveIntegerField(
+        default=70,
+        help_text="Navbar position for Contact link"
+    )
+
     # Layout options
     layout_style = models.CharField(max_length=20, default='linkedin',
                                     choices=[

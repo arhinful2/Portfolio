@@ -107,6 +107,18 @@ class SectionVisibilityInline(admin.StackedInline):
                        'show_skills', 'show_projects', 'show_certifications',
                        'show_media', 'show_contact')
         }),
+        ('Navbar Order', {
+            'fields': (
+                'nav_about_order',
+                'nav_experience_order',
+                'nav_education_order',
+                'nav_projects_order',
+                'nav_skills_order',
+                'nav_media_order',
+                'nav_contact_order',
+            ),
+            'description': 'Set the display order of the navbar links. Lower numbers appear first.',
+        }),
         ('Layout Options', {
             'fields': ('layout_style',)
         }),

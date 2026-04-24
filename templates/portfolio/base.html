@@ -150,20 +150,13 @@
         </a>
 
         <div class="nav-links">
-          <a href="#about" class="nav-link">About</a>
-          {% if portfolio_visibility and portfolio_visibility.show_experience %}
-          <a href="#experience" class="nav-link">Experience</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
-          <a href="#education" class="nav-link">Education</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
-          <a href="#projects" class="nav-link">Projects</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
-          <a href="#skills" class="nav-link">Skills</a>
-          {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
-          <a href="{% url 'media_gallery' %}" class="nav-link">Media</a>
+          {% for item in navigation_items %}
+          {% if item.is_url_name %}
+          <a href="{% url item.href %}" class="nav-link">{{ item.label }}</a>
+          {% else %}
+          <a href="{{ item.href }}" class="nav-link">{{ item.label }}</a>
           {% endif %}
-
-          <a href="#contact" class="nav-link">Contact</a>
+          {% endfor %}
 
           <!-- Dark Mode Toggle -->
           <button id="darkModeToggle" class="dark-mode-toggle">
@@ -179,19 +172,13 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu">
-      <a href="#about" class="mobile-nav-link">About</a>
-      {% if portfolio_visibility and portfolio_visibility.show_experience %}
-      <a href="#experience" class="mobile-nav-link">Experience</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_education %}
-      <a href="#education" class="mobile-nav-link">Education</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_projects %}
-      <a href="#projects" class="mobile-nav-link">Projects</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_skills %}
-      <a href="#skills" class="mobile-nav-link">Skills</a>
-      {% endif %} {% if portfolio_visibility and portfolio_visibility.show_media %}
-      <a href="{% url 'media_gallery' %}" class="mobile-nav-link">Media</a>
+      {% for item in navigation_items %}
+      {% if item.is_url_name %}
+      <a href="{% url item.href %}" class="mobile-nav-link">{{ item.label }}</a>
+      {% else %}
+      <a href="{{ item.href }}" class="mobile-nav-link">{{ item.label }}</a>
       {% endif %}
-      <a href="#contact" class="mobile-nav-link">Contact</a>
+      {% endfor %}
     </div>
 
     <!-- Mobile Menu Backdrop -->
