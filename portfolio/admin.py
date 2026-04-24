@@ -486,7 +486,7 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
                     'email_host_user', 'database_engine', 'runtime_database_badge', 'seo_site_name', 'updated_at')
     list_editable = ('is_active',)
     readonly_fields = ('runtime_database_badge',
-                       'professional_setup_tips', 'updated_at',)
+                       'professional_setup_tips', 'favicon_preview', 'updated_at',)
     actions = ('test_postgresql_connection', 'refresh_runtime_database_status')
 
     fieldsets = (
@@ -535,6 +535,8 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
                 'seo_meta_robots',
                 'seo_canonical_base_url',
                 'seo_og_image_url',
+                'favicon_image',
+                'favicon_preview',
                 'seo_twitter_card',
             ),
             'description': 'Tip: fill these once to power global SEO tags across your portfolio pages.',
@@ -625,3 +627,16 @@ class SystemConfigurationAdmin(admin.ModelAdmin):
         )
 
     professional_setup_tips.short_description = 'Configuration Guidance'  # type: ignore
+
+    def favicon_preview(self, obj):
+        if obj and obj.favicon_image:
+            return format_html(
+                '<div style="display:flex;align-items:center;gap:12px;">'
+                '<img src="{}" alt="Favicon preview" style="width:48px;height:48px;border-radius:10px;border:1px solid #d1d5db;object-fit:cover;background:#fff;" />'
+                '<span style="color:#4b5563;">Current favicon preview</span>'
+                '</div>',
+                obj.favicon_image.url,
+            )
+        return mark_safe('<span style="color:#6b7280;">No favicon uploaded yet. The site will use the static fallback.</span>')
+
+    favicon_preview.short_description = 'Favicon Preview'  # type: ignore

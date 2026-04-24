@@ -672,6 +672,12 @@ class SystemConfiguration(models.Model):
         null=True,
         help_text="Tip: full image URL used for social sharing (Open Graph/Twitter)."
     )
+    favicon_image = models.ImageField(
+        upload_to='site_assets/',
+        blank=True,
+        null=True,
+        help_text="Upload a favicon image for the site header/browser tab. Recommended: square PNG or JPG."
+    )
     seo_twitter_card = models.CharField(
         max_length=30,
         choices=[

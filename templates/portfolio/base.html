@@ -81,11 +81,15 @@
     {% endif %}
 
     <!-- Favicon -->
+    {% if system_config and system_config.favicon_image %}
+    <link rel="icon" href="{{ system_config.favicon_image.url }}" />
+    {% else %}
     <link
       rel="icon"
       type="image/svg+xml"
       href="{% static 'images/favicon.svg' %}"
     />
+    {% endif %}
 
     <!-- Font Awesome -->
     <link
