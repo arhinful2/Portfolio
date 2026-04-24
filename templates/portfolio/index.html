@@ -144,8 +144,7 @@ Explore this professional portfolio with projects, experience, and skills. {% en
     </h2>
 
     <div class="about-content">
-      {% if portfolio_profile.summary %} {{ portfolio_profile.summary|safe }} {%
-      else %}
+      {% if portfolio_profile.summary %} {{ portfolio_profile.summary|safe }} {% else %}
       <p>
         Your professional summary will appear here. Edit it in the admin panel
         to showcase your experience, skills, and achievements.
