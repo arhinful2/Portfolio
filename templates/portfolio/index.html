@@ -278,8 +278,7 @@ Explore this professional portfolio with projects, experience, and skills. {% en
 
           <div class="timeline-period">
             <i class="far fa-calendar"></i>
-            {{ edu.start_date|date:"M Y" }} - {% if edu.end_date %} {{
-            edu.end_date|date:"M Y" }} {% else %} Present {% endif %}
+            {{ edu.start_date|date:"M Y" }} - {% if edu.end_date %} {{ edu.end_date|date:"M Y" }} {% else %} Present {% endif %}
           </div>
 
           {% if edu.description %}
