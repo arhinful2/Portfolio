@@ -54,6 +54,18 @@ def build_navigation_items(visibility):
     )
 
 
+def build_section_orders(visibility):
+    return {
+        'about': getattr(visibility, 'nav_about_order', 10),
+        'experience': getattr(visibility, 'nav_experience_order', 20),
+        'education': getattr(visibility, 'nav_education_order', 30),
+        'projects': getattr(visibility, 'nav_projects_order', 40),
+        'skills': getattr(visibility, 'nav_skills_order', 50),
+        'contact': getattr(visibility, 'nav_contact_order', 70),
+        'dynamic_base': 1000,
+    }
+
+
 def portfolio_context(request):
     """Add portfolio data to all templates"""
     try:
@@ -64,6 +76,7 @@ def portfolio_context(request):
             'portfolio_profile': profile,
             'portfolio_visibility': visibility,
             'navigation_items': build_navigation_items(visibility),
+            'section_orders': build_section_orders(visibility),
             'system_config': system_config,
         }
     except:
@@ -71,5 +84,6 @@ def portfolio_context(request):
             'portfolio_profile': None,
             'portfolio_visibility': None,
             'navigation_items': [],
+            'section_orders': {'dynamic_base': 1000},
             'system_config': None,
         }

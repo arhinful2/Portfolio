@@ -132,8 +132,9 @@
 </section>
 
 <!-- About Section -->
+<div class="portfolio-sections">
 {% if portfolio_visibility is None or portfolio_visibility.show_about %}
-<section id="about" class="section about-section" data-aos="fade-up">
+<section id="about" class="section about-section" data-aos="fade-up" style="order: {{ section_orders.about|default:10 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-user"></i>
@@ -165,7 +166,7 @@
 
 <!-- Experience Section -->
 {% if portfolio_visibility and portfolio_visibility.show_experience and experiences %}
-<section id="experience" class="section experience-section" data-aos="fade-up">
+<section id="experience" class="section experience-section" data-aos="fade-up" style="order: {{ section_orders.experience|default:20 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-briefcase"></i>
@@ -242,7 +243,7 @@
 
 <!-- Education Section -->
 {% if portfolio_visibility and portfolio_visibility.show_education and educations %}
-<section id="education" class="section education-section" data-aos="fade-up">
+<section id="education" class="section education-section" data-aos="fade-up" style="order: {{ section_orders.education|default:30 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-graduation-cap"></i>
@@ -298,7 +299,7 @@
 
 <!-- Projects Section -->
 {% if portfolio_visibility and portfolio_visibility.show_projects and projects %}
-<section id="projects" class="section projects-section" data-aos="fade-up">
+<section id="projects" class="section projects-section" data-aos="fade-up" style="order: {{ section_orders.projects|default:40 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-project-diagram"></i>
@@ -416,7 +417,7 @@
 
 <!-- Skills Section -->
 {% if portfolio_visibility and portfolio_visibility.show_skills and skills_by_category %}
-<section id="skills" class="section skills-section" data-aos="fade-up">
+<section id="skills" class="section skills-section" data-aos="fade-up" style="order: {{ section_orders.skills|default:50 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-star"></i>
@@ -466,6 +467,7 @@
   id="section-{{ section.id }}"
   class="section dynamic-section {{ section.layout_style }} {{ section.css_class }}"
   data-aos="fade-up"
+  style="order: {{ section_orders.dynamic_base|default:1000|add:section.order }};"
 >
   <div class="container">
     {% if section.show_title %}
@@ -623,7 +625,8 @@
 {% endfor %} {% endif %}
 
 <!-- Contact Section -->
-<section id="contact" class="section contact-section" data-aos="fade-up">
+{% if portfolio_visibility is None or portfolio_visibility.show_contact %}
+<section id="contact" class="section contact-section" data-aos="fade-up" style="order: {{ section_orders.contact|default:70 }};">
   <div class="container">
     <h2 class="section-title">
       <i class="fas fa-envelope"></i>
@@ -721,6 +724,8 @@
     </div>
   </div>
 </section>
+{% endif %}
+ </div>
 {% endblock %} {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {

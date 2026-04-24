@@ -202,11 +202,13 @@
 
           <div class="footer-section">
             <h4>Quick Links</h4>
-            <a href="#about">About</a>
-            <a href="#experience">Experience</a>
-            <a href="#education">Education</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
+            {% for item in navigation_items %}
+            {% if item.is_url_name %}
+            <a href="{% url item.href %}">{{ item.label }}</a>
+            {% else %}
+            <a href="{{ item.href }}">{{ item.label }}</a>
+            {% endif %}
+            {% endfor %}
           </div>
 
           <div class="footer-section">
