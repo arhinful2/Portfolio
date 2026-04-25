@@ -2,7 +2,9 @@ from django.db import models  # type: ignore
 from django.contrib.auth.models import User  # type: ignore
 from tinymce.models import HTMLField  # type: ignore
 import os
+import html
 from django.utils import timezone
+from django.utils.html import strip_tags
 
 
 def user_directory_path(instance, filename):
@@ -323,6 +325,11 @@ class MediaFile(models.Model):
         """Auto-detect file type from extension"""
         if self.project_id and not self.profile_id:
             self.profile_id = self.project.profile_id
+
+        if self.description:
+            # Media descriptions should remain plain text in cards/list views.
+            cleaned = strip_tags(self.description)
+            self.description = html.unescape(cleaned).strip()
 
         if not self.file_type:
             ext = os.path.splitext(self.file.name)[1].lower()

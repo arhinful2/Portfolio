@@ -17,7 +17,7 @@
                             {{ media.file_type|title }}
                             {% if media.category %} • {{ media.category }}{% endif %}
                         </h6>
-                        <p class="card-text">{{ media.description|truncatechars:150 }}</p>
+                        <p class="card-text">{{ media.description|striptags|truncatechars:150 }}</p>
                         <a href="{{ media.file.url }}" class="btn btn-primary" target="_blank">
                             View/Download
                         </a>

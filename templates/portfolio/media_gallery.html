@@ -305,7 +305,7 @@
 
               {% if media.description %}
               <p class="card-text small text-muted">
-                {{ media.description|truncatechars:100 }}
+                {{ media.description|striptags|truncatechars:100 }}
               </p>
               {% endif %} {% if media.category %}
               <span class="badge bg-light text-dark mb-2">
