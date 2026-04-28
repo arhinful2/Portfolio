@@ -3,7 +3,7 @@ from django.contrib.auth.models import User  # type: ignore
 from tinymce.models import HTMLField  # type: ignore
 import os
 import html
-from django.utils import timezone
+from django.utils import timezon
 from django.utils.html import strip_tags
 
 
