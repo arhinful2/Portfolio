@@ -12,7 +12,3 @@ python manage.py collectstatic
 
 REM Run the development server
 python manage.py runserver
-
-
-geysglwzcmepifcj
-https://myaccount.google.com/apppasswords
