@@ -1,4 +1,4 @@
-# Aarhinful Portfolio
+#  Portfolio Website
 
 A modern, feature-rich Django-based portfolio and project showcase application with professional profile management, media gallery, and contact messaging capabilities.
 
