@@ -31,6 +31,7 @@ media/uploads/*.pdf
 
 # Local secrets
 credentials
+commands.txt
 *.env
 .env
 .env.*
